@@ -1,0 +1,627 @@
+
+##################################################################################
+#
+#        Note 03: R Objects - ARRAY, LIST, DATAFRAME, RNG and FLOW CONTROLS
+#
+##################################################################################
+
+
+
+################
+#
+#   ARRAYS: 
+#
+###############
+
+
+#  The generalization of matrices to more than 2 indexes
+#
+          a = array(1:24, dim=c(2,3,4))
+          a
+          a[1,2,1]
+          a[,2:3,c(1,4)]
+          a[,,c(T,F,T,F)]
+          a[,,-3]
+
+#       Main use: contingency tables
+
+#       e.g., table frequencies of sex by education by income bracket ...
+#       The associative array feature exists also when a dimnames are given
+#       To understand this, we need to talk about lists first.
+#
+
+################
+#
+#   LISTS:
+#
+################
+
+
+#   01: Recall: Vectors and matrices can carry only one basic type
+#               of data at a time, numeric OR logical OR character.
+
+                matrix(c(T,F),nrow=4,ncol=4)
+                matrix(paste(LETTERS,letters)[1:25],nrow=5)
+
+#  02:   Lists are data structures without this restriction.
+#        Lists are sequences of anything.  They can contain:
+#        basic data types, vectors, matrices, arrays, lists (recursion),...
+#        In particular, they can contain arbitrarily nested lists of lists.
+#        Examples:
+
+         list(1,"1",T,F,1E100,NA,-Inf,NULL,1:5,letters[2:5],list(1,2,"a"))
+
+         # Balanced binary tree:
+          list(list(list(1,2),list(3,4)),list(list(5,6),list(7,8)))  
+#
+          mylist = list(vec=1:3, mat=cbind(1:2,3:4), flags=c(T,T,F,T),lst=list(1:3,1:4))
+          mylist
+
+#         Component names are optional.  They can be glued on by force:
+          x = list(1,"a",T,NULL);  names(x) = LETTERS[1:4];  x
+
+#   03:   Access to LIST ITEMS is by index with "[[..]]", or by "$name"
+#         if names exist:
+
+            mylist[[2]]
+            mylist$mat
+            mylist[["mat"]]
+
+#         This is also how lists are printed:
+            list(1,T)
+            list(a=1,b=T)
+#
+#   04: Access to SUBLISTS is as if the list were a vector:
+            mylist[2:3]                           # Sublist of length 2.
+            mylist[2]                             # Sublist of length 1.
+            mylist[c(1,4,1,4,2,3,2,3)]            # Out-of-order and expansion.
+            mylist[c("lst","mat","vec","mat")]    # Named access.
+            mylist["vec"]                         # Sublist of length 1.
+            mylist[["vec"]]                       # Vector!!!
+            mylist[c(T,F,T,F)]                    # Logical selection
+#         
+#   05:  Sublists are lists and require list item access to get at
+#        the components:
+
+            mylist[2:3][[1]]
+            mylist[2:3]$mat
+            mylist[2][[1]]         # Again, "mylist[2]" is a list of length 1...
+            mylist[2]$mat           
+#
+#   06:  Primary use of lists in statistics: 
+#        collecting the results of a complex statistical or numerical
+#        analysis, such as a regression or an eigendecomposition:
+
+          eigen(matrix(1,3,3))
+
+#       is a list with two named items: $values and $vectors,
+#       the first being a vector containing the eigenvalues,
+#       the second being a matrix with the eigenvectors in the columns.
+#
+#   
+#
+#####################
+#
+#   DATAFRAMES:
+#
+#####################
+
+
+#   01:   In statistics, data are usually rectangular tables, cases by variables.
+
+#         Problem: Variables are not all of the same type.
+#                  Some may be quantitative, hence stored as numeric data,.
+#                  Other variables may be categorical and stored either
+#                  with numeric or character/string codes for categories.
+#                  => Matrices cannot accommodate variables of both types...
+
+#         Solution: Data frames.  They are similar to matrices,
+#                  but columns may differ in basic data types.
+#                  (The entries have to be basic, not complex.)
+
+#         Main use of dataframes: data tables with mixed-type variables
+#
+#         Dataframes are printed like matrices, but they are internally
+#         implemented as lists.
+#
+#   02:   The function "data.frame()" can bundle conforming vectors,
+#         matrices, other dataframes into a single dataframe:
+
+          myframe = data.frame(somenumbers=1:3,
+                              somecharacters=c("a","b","c"),
+                              somelogicals=c(T,F,T))
+
+          myframe
+#
+#   04:   Auxiliary functions for dataframes:
+
+          is.data.frame(myframe)          # Checking type.
+          as.data.frame(cbind(1:4,11:14)) # Coercing a matrix to a dataframe.
+#
+#   05:   Many matrix manipulations carry over to dataframes,
+#         with one exception:
+
+            dim(myframe)
+            nrow(myframe)
+            ncol(myframe)
+            rownames(myframe)
+            colnames(myframe)
+            myframe[,3]            # Col 3 coerced to vector.
+            myframe[2,]            # << Sub-dataframe with row 3, NOT coerced to vector!
+            myframe[,2:3]          # Sub-dataframe consisting of cols 2 and 3.
+            myframe[2:3,]          # Sub-dataframe consisting of rows 2 and 3.
+
+#         Why is 'myframe[2,]' not coerced to a vector?
+#         Because the items might be of differing types!
+#         Hence the row 'myframe[2,]' is still a dataframe...
+#
+#         (Of course matrix multiplication does not work:)
+
+           myframe %*% matrix(rep(1,10), nrow=5)
+
+#   06:  'read.table()' reads a tabular ASCII/txt file into a dataframe,
+#         possibly with row and column names:
+
+          read.table("laser.dat", header=T)
+
+#         The file can be an URL:
+
+#         This function has many other options for particular cases.
+#         From the "help()" page:
+#         read.table(file, header = FALSE, sep = "", quote = "\"'", dec = ".",
+#                  row.names, col.names, as.is = FALSE, na.strings = "NA",
+#                  colClasses = NA, nrows = -1,
+#                  skip = 0, check.names = TRUE, fill = !blank.lines.skip,
+#                  strip.white = FALSE, blank.lines.skip = TRUE,
+#                  comment.char = "#")
+
+#   07:  Other data input functions that similar to read.table() but read in data in specific formats 
+#        are listed below:
+
+         read.csv(file, header = TRUE, sep = ",", quote="\"", dec=".",
+                  fill = TRUE, comment.char="", ...)
+
+         read.csv2(file, header = TRUE, sep = ";", quote="\"", dec=",",
+                  fill = TRUE, comment.char="", ...)
+
+         read.delim(file, header = TRUE, sep = "\t", quote="\"", dec=".",
+                  fill = TRUE, comment.char="", ...)
+
+         read.delim2(file, header = TRUE, sep = "\t", quote="\"", dec=",",
+                  fill = TRUE, comment.char="", ...)
+#
+#        libray(foreign) has severak functions that can be used to read data stored by Minitab, 
+#        S, SAS, SPSS, Stata, Systat, Weka, dBase, etc. To see the full list of function in {foreign}
+#        type the following commands in the R console:  
+          
+          library(help=foreign)  # or 
+          help(package=foreign) 
+
+#        Here is one example.
+
+         library(foreign)
+         x = read.spss("foo.sav", to.data.frame=TRUE) # Read file foo.sav
+
+#        NOTE: unfortunately, R cannot read SAS data .sas7bdat directly. If you don't have SAS on your
+#              computer, you will not be able to convert .sas7bdat to .xport for R to read in. One way 
+#              to solve this probalem is to download a free SAS System Viewer to open SAS datasets and 
+#              export them to e.g..csv format.
+#
+##
+#  08:  by() - applying a function to a data frame split by factors
+#        USAGE: by(data, INDICES, FUN, ..., simplify = TRUE)
+#
+#    WORKING DATA SET: 32 passenger cars (different makers and different models) are randomly selected
+#                      from Berlin City Auto Group in Maine. We record the following information from 
+#                      each of the 32 cars: mpg, car weight and number of cylinders;
+
+    mpg=c(21.0, 21.0, 22.8, 21.4, 18.7, 18.1, 14.3, 24.4, 22.8, 19.2, 17.8, 16.4, 17.3, 15.2, 10.4, 10.4,
+         14.7, 32.4, 30.4, 33.9, 21.5, 15.5, 15.2, 13.3, 19.2, 27.3, 26.0, 30.4, 15.8, 19.7, 15.0, 21.4)
+
+    car.wt=c(2.620, 2.875, 2.320, 3.215, 3.440, 3.460, 3.570, 3.190, 3.150, 3.440, 3.440, 4.070, 3.730,
+            3.780, 5.250, 5.424, 5.345, 2.200, 1.615, 1.835, 2.465, 3.520, 3.435, 3.840, 3.845, 1.935,
+            2.140, 1.513, 3.170, 2.770, 3.570, 2.780)
+
+    num.cyl=c(6, 6, 4, 6, 8, 6, 8, 4, 4, 6, 6, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 8, 8, 8, 8, 4, 4, 4, 8, 6, 8, 4)
+
+    car.dat=as.data.frame(cbind(mpg=mpg, car.wt=car.wt, num.cyl=num.cyl))
+    by(car.dat[,1:2], car.dat[,3], summary)
+
+#
+#
+#
+#######################################################################
+#
+#             SAVING OUTPUT TO A FILE (TEXT AND GRAPHICS)
+#
+#######################################################################
+#
+#
+#  01:  Current directory and change directory
+#
+#       getwd() # What is the current working folder?
+
+        The working folder can be set using the setwd function, or 
+        using the RGui menu: File > Change dir...
+#
+#
+#  02:  Writing output (text) to a file - in the current working directory. 
+#       You can also specify a particular location:
+#
+        x= data.frame(cbind(v1=1:5, v2=6:10, v3=11:15))
+        # We will Write data frame (or matrix) x to a file named foo.txt in 
+        # current working directory you can find using getwd()
+        # In my computer: C:/Users/Peng/Documents
+        write.table(x, "foo.txt", sep='\t', quote=FALSE) 
+        check.x = read.table("foo.txt", header=TRUE, sep = '\t') # Read file foo.txt
+        check.x
+
+#       Comma-separated data: Write x to a file named foo.csv 
+#       (the .csv extension will open the file in Excel)
+
+        write.csv(x, file="foo.csv", quote=FALSE) 
+        check.x.csv = read.csv("foo.csv")
+        check.x.csv
+#     
+#       Appending files:
+
+        write.csv(x, file="foo.csv", quote=FALSE, append=TRUE)
+#
+#  03: Saving R text out to a file
+# 
+       sink("foo.txt")  # Open a file named foo.txt in the current working folder
+       x = 1:10
+       x                # Send this output to the file
+       mean(x)          # ...and this output
+       sink()           # Close the file. Subsequent output is displayed on the R Console as usual
+#
+#
+#  04: Making tables of summary statistics
+#      We first define a function called describe:
+
+       describe = function(x) {
+          list(N=length(x), Mean=mean(x), "Stdev"=sd(x))
+          }
+
+       x = sapply(iris[1:4], describe)        # Apply 'describe' to the first 4 columns of data
+       t(x)                                   # transpose the table
+       write.table(t(x), "f.table.txt", sep='\t', quote=FALSE)  # Write the table to a file named foo.txt
+       check.table=read.table("f.table.txt")
+       check.table
+       round(check.table,4)                   # this does not work since this is a non-numeric object
+#
+#
+#  05: Saving plots as image files using savePlot()
+#
+#      Save the current plot as an image file:
+
+       x=seq(-pi,pi,pi/12)
+       y=sin(2*x)
+       plot(x,y, type="b", col="red", main="This is a sine curve")
+       savePlot("myplot", type="jpg")    # Save the current plot as a jpeg image in a file named myplot.jpg
+
+#      Save the current plot to the clipboard, so it can be pasted:
+
+       savePlot("clipboard", type="wmf")
+#
+#  06: Saving plots as PDF/PS files using function pdf() /postscript():
+     
+       
+       library(grDevices)
+       pdf("myplot0.pdf") # Open a file named myplot.pdf using a driver that will create the PDF
+       plot(1:10) # Plot something
+       dev.off() # Close the file. 
+#
+#    
+       require(graphics)
+       postscript("foo.ps")     # open the file "foo.ps" for graphics output
+       x=seq(-pi,pi,pi/12)
+       y=cos(x)+sin(x)
+       plot(x,y, type="b", col="red", main="This is a sine curve")
+       dev.off()              # turn off the postscript device
+
+#
+#     For inclusion in Computer Modern TeX documents, perhaps
+
+       postscript("cm_latex.eps", width = 4.0, height = 3.0,
+           horizontal = FALSE, onefile = FALSE, paper = "special",
+           family = "ComputerModern", encoding = "TeXtext.enc") 
+       x=seq(-pi,pi,pi/12)
+       y=cos(x)+sin(x)
+       plot(x,y, type="b", col="red", main="This is a sine curve")
+       dev.off()              # turn off the postscript device   
+    
+#
+#
+########################################################################
+#
+# DISTRIBUTIONS: PSEUDO-RANDOM NUMBERS, QUANTILES, CDFS, DENSITIES
+#
+########################################################################
+
+# 01: The following continuous distributions come with the standard
+#     version of R, each with
+#     a). a random number generator,
+#     b). a quantile function,
+#     c). a cdf function, and
+#     d). a density fct.
+
+#   - Uniform:
+#       runif(n, min = 0, max = 1) 
+#       qunif(p, min = 0, max = 1, lower.tail = TRUE, log.p = FALSE) 
+#       punif(q, min = 0, max = 1, lower.tail = TRUE, log.p = FALSE) 
+#       dunif(x, min = 0, max = 1, log = FALSE) 
+#
+#   - Normal:
+#       rnorm(n, mean = 0, sd = 1) 
+#       qnorm(p, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE) 
+#       pnorm(q, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE) 
+#       dnorm(x, mean = 0, sd = 1, log = FALSE) 
+#                  
+#   - Student's t:
+#       rt(n, df)         
+#       qt(p, df, lower.tail = TRUE, log.p = FALSE)
+#       pt(q, df, ncp, lower.tail = TRUE, log.p = FALSE)
+#       dt(x, df, log = FALSE)
+#
+#   - F:
+#       rf(n, df1, df2)
+#       qf(p, df1, df2, lower.tail = TRUE, log.p = FALSE) 
+#       pf(q, df1, df2, ncp = 0, lower.tail = TRUE, log.p = FALSE) 
+#       df(x, df1, df2, log = FALSE) 
+#                  
+#   - Chi-square:
+#       rchisq(n,df,ncp=0)
+#       qchisq(p, df, ncp = 0, lower.tail = TRUE, log.p = FALSE) 
+#       pchisq(q, df, ncp = 0, lower.tail = TRUE, log.p = FALSE) 
+#       dchisq(x, df, ncp = 0, log = FALSE) 
+#                  
+#   - Exponential:
+#       rexp(n, rate = 1)
+#       qexp(p, rate = 1, lower.tail = TRUE, log.p = FALSE) 
+#       pexp(q, rate = 1, lower.tail = TRUE, log.p = FALSE) 
+#       dexp(x, rate = 1, log = FALSE) 
+#                  
+#   - Cauchy:
+#       rcauchy(n, location = 0, scale = 1) 
+#       qcauchy(p, location = 0, scale = 1, lower.tail = TRUE, log.p = FALSE)
+#       pcauchy(q, location = 0, scale = 1, lower.tail = TRUE, log.p = FALSE)
+#       dcauchy(x, location = 0, scale = 1, log = FALSE) 
+#                  
+#   - Beta:
+#       rbeta(n,shape1,shape2)
+#       qbeta(p, shape1, shape2, lower.tail = TRUE, log.p = FALSE) 
+#       pbeta(q, shape1, shape2, ncp = 0, lower.tail = TRUE, log.p = FALSE) 
+#       dbeta(x, shape1, shape2, ncp = 0, log = FALSE) 
+#                  
+#   - Gamma:
+#       rgamma(n,shape,rate=1,scale=1/rate)
+#       qgamma(p, shape, rate = 1, scale = 1/rate, lower.tail = TRUE, 
+#       pgamma(q, shape, rate = 1, scale = 1/rate, lower.tail = TRUE, 
+#       dgamma(x, shape, rate = 1, scale = 1/rate, log = FALSE) 
+#
+# 02: Some uses:
+#      - Random number generators are used, for example, 
+#       a). in simulations, as when evaluating the efficiency
+#           of statistical methods;
+#       b). in Bootstrap inference for frequentist statistics;
+#       c). in Bayesian computing to simulate posterior distributions.
+#
+#       Base of simulations: law of large numbers (rel. freq. approx. probs.)
+
+#     - The quantile functions are used
+#       a). to find critical values in statistical tests;
+#       b). in q-q-plots to check empirical against theoretical distributions
+#           (see below).
+
+#     - The cdf functions are used for calculating p-values in 
+#         statistical tests.
+
+#     - The normal density is sometimes used as a "kernel" in 
+#         smoothing methods.
+#
+#     - Simulating discrete distributions and sampling:
+#       The function
+          sample()
+
+#       serves many purposes.  It does sampling with and without replacement.
+#
+#     - Bernoulli trials and Binomials: e.g., 10 head/tails, biased coin flip,
+          ifelse(runif(10)<.55, "H", "T")
+          sample(c("H","T"), size=10, repl=T, prob=c(0.55,0.45))
+          rbinom(n=10, size=1, p=.55)
+        # (Sampling WITH replacement is also called i.i.d. sampling.)
+#
+#     - Multinomial: e.g., 10 draws from uniform distribution on 4 objects
+          sample(1:4, size=10, repl=T, prob=rep(1/4,4))
+          dmultinom; rmultinom
+#
+#     - Sampling WITH replacement:
+          sample(1:10, 5)               # Samples w/o replacement (default).
+          sample(10)                    # Random permutation of 1:10.
+
+#     - The function can also be applied to non-numeric data:
+          sample(letters)               # A permutation of letters.
+          sample(letters, 10)           # 10 distinct random letters.
+          sample(letters, 10, repl=T)   # 10 i.i.d. samples of letters.
+          sample(letters, 100)          # Error!  Sampling w/o replacement.
+          sample(letters, 100, repl=T)  # Fine!  Sampling with replacement.
+#
+#        'sample()' is used to implement modern resampling methods such as
+#        the bootstrap and permutation tests (see below).
+#
+# 03: Random Seed: .Random.seed is an integer vector, containing the random number 
+#       generator (RNG) state for random number generation in R. 
+#       It can be saved and restored, but should not be altered by the user.
+#       Important note on seeding random number generators:
+#       The "seed" stores the state of the pseudo-random number generator.
+
+        .Random.seed
+        runif(1)
+        .Random.seed                          # The seed has changed.
+        Random.seed.store = .Random.seed      # Store the seed. Caution: This random seed 
+                                              # stored in Random.seed.store is different from
+                                              # the in the above command line.
+        runif(1)                              # (*) Remember this random number.
+        runif(10)                             # Now push the generator 10 times.
+        .Random.seed = Random.seed.store      # Force it back to recreate (*)
+        runif(1)
+
+#      Indeed, this is the same random number as in (*).
+#      Storing the seed is important for simulations that must be
+#      reproduceable, for example, when putting simulation results
+#      in a publication.
+#
+#      Note: Use of .Random.seed is an optional topic in this course.
+#
+#
+#
+####################################################################
+#  
+#        Introduction to Flow control: loops, conditionals 
+#
+####################################################################
+#
+#
+         m = 1:12       # play data
+#
+#
+#   01: if-conditional:
+
+         if(length(m) > 15) { print("m is greater than 10") }
+
+#       With "else" clause:
+
+          if(length(m) > 15) {
+              print("m > 10")
+            } else { 
+              print("m <= 10")
+           } 
+
+#        This sort of thing is most useful inside loops; see below.
+
+#  02:  The vectorized "ifelse()" function:
+#       Not a flow control construct, but often replaces a combination of
+#       for-loop and if-else statements.
+
+            ifelse(c(T,F,T), c(1,2,3), c(-1,-2,-3))
+
+#        The function runs down the three arguments in parallel,
+#        checks each element in the first argument,
+#        if true,  picks the corresponding element in the second argument,
+#        if false, picks the corresponding element in the third argument,
+#        returns a vector/matrix/array of the size of the first argument.
+#        If the second or third argument are not conforming,
+#        they are cyclically repeated, as in this implementation of
+#        10 Uniform trials:
+
+        ifelse(runif(10) > 0.5, "H", "T")
+
+#       Note the difference between 'if' and 'ifelse()':
+#         a) 'if' is a syntactic element that dispatches execution
+#             depending on the outcome of a single logical outcome.
+#         b) 'ifelse()' is a function that takes a logical vector
+#             and selects from two other vectors depending on the logicals.
+
+#   03:  for-loop: runs over the elements of a vector.
+
+          for(i in c(10,100,1000)) { j = 2*i; print(j); }
+
+#         The variable 'i' is the looping variable.  It takes
+#         each element of the vector in turn, and for each
+#         the subsequent, usually composite ({...}) statement gets executed.
+#         (Braces are optional if there is only one statement in the loop.)
+#
+##        Sample M random pairs in a set of N objects and store them in a matrix
+                N=1:10
+                M=20
+                PAIR=matrix(rep(0,2*M),ncol=2)
+                for (i in 1:M)    #  As shown, the sample function returns a single
+                    {             #  element in the interval 1:N
+                      p = sample(N, 1)
+                      q = sample(N, 1)       # Additional processing as needed¡­
+                      PAIR[i,]=c(p, q);
+                      cat("Pair #",i,":",PAIR[i,],"\n")    # It is always a good idea to
+                                                           # to print out some thing from the loop
+                                                           # and make sure everything is fine.
+                   }
+
+#   05:   repeat-loop: needs a "break" for termination.
+#                      (1). break statement can be used to break the current loop
+
+          RUNIF=NULL
+          i=1
+          repeat{ 
+                 print("Trying...")   
+                 rnum = runif(1) 
+                 RUNIF[i]=rnum              
+                 if(rnum > 0.9) { 
+                      print(c("Found one:",rnum))
+                      break 
+                      } 
+                  i=i+1
+                }
+
+
+          
+
+
+#   06:   while-loop:  (1). While expr_1 is false, repeatedly evaluate expr_2
+#                      (2). next statement can be used to skip the current iteration of the loop
+#         Example :
+#         Defne a 10-component vector that stores only uniform random numbers that are bigger than 0.5
+
+                U.gt.0.5=rep(0,10)
+                ctr=1
+                while(ctr <= 10) {
+                      U=runif(1)
+                      if(U <= 0.5) next
+                      else U.gt.0.5[ctr]=U
+                      cat(" component ",ctr,":",U, "\n")
+                      ctr = ctr + 1          # update the counter
+                   }
+                 U.gt.0.5
+#
+#
+#   07:  Implicit looping over row or columns of matrices with 'apply()':
+
+               m = matrix(1:12, 3)  
+               m
+
+#     a)  Looping over rows::
+
+          apply(m, 1, min)   # Return a vector with minima of the rows.
+#                     ^^^ the "min()" function, applied to the 1st dimension.
+
+#     b)  Looping over columns:
+
+          apply(m, 2, mean)  # Return a vector with the means of the columns.
+#                     ^^^^ the "mean()" function, applied to the 2nd dim.
+#
+#     c)  'apply()' can also be used with functions that return vectors, 
+#         such as 'range()' and 'sort()':
+
+           apply(m, 2, range)
+
+#         There are complications with "apply(m, 1, range)":
+#         the result is 2xnrow(m), not nrow(m)x2, as one would expect.
+#         This requires transposition, 't()', to get the expected matrix:
+
+          t(apply(m, 1, range))
+#
+#
+#   08: Implicit looping over elements of a list:
+         lis = list(numvec=1:10, charvec=letters,
+                     logicvec=rep(c(T,F),3), mat=cbind(1:3,1))
+         lis
+         lapply(lis, length)           # returns a list with one number per entry: the length
+         unlist(lapply(lis, length))   # same but 'flattened' to a vector
+         sapply(lis, length)           # same but Simpler ('Simple apply')
+         lapply(lis, dim)              # returns a list with the dim attribute for each entry
+         lapply(lis, sort)             # returns a list of sorted vectors
+#
+#
+
+##############################################################
+
+

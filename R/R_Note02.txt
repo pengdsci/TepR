@@ -1,0 +1,658 @@
+
+################################################################
+#
+#              Note 02:  R Objects - Vectors and Matrices
+#
+################################################################
+
+########################
+#
+###      VECTORS:
+#     
+########################
+
+#  01:  DEFINITION:
+#       A vector is a sequence of ORDERED items of the SAME basic data type. 
+
+        c(1,3,4.5)          #  three values in a vector.
+        c("a","ab")         #  two strings in a vector.
+        c(T,F,T)            #  three logical values in a vector.
+        c(2.1,T)            #  Not an error.  T is coerced to 1.
+        c(2,"a",T)          #  Not an error.  1 and T are coerced to strings.
+
+#     If the items are not of the same type, a coercion will be in place:
+#       string =- numeric =- logical
+#     (If the items are of variable types and should not be coerced,
+#     use lists instead of vectors. details to follow.....)
+#
+
+#
+# 02: INDEXING AND ACCESSING VALUES OF A VECTOR:
+#
+#     
+#     R has many different ways for accessing elements of vectors using 
+#     their corresponding indices:
+      a0 = c(2, 1, 2.1, 3.5, 5, 7, 8.9)
+#     an index, say 4, points to the physical location of the vector. i.e,
+#     a0[4] = 3.5.       
+
+#   a). Numeric indexes
+        a = c(1,3,5)
+        a[1]; a[2];  a[3]
+
+#   b). Vector indexes:
+
+        a[c(1,3)]
+
+#     or, equivalently, except for the allocation of another vector 'b':
+
+        b = c(1,3);  a[b]
+
+#   c). Vector expansion: amounts to mapping the indexes, using 'a' as a map.
+
+        a[c(1,2,1,2,1,1,1,3,3,3)]
+
+#   d). Exclusions with negative numeric indexes:
+
+        a[-1]
+        d = a[-1]
+        a[c(-1,-3)]
+        b = c(-1,-3);  a[b]  
+        a[c(-1,-2,-3)]   # Nothing left.
+        a = a[-1]       # remove the first element of 'a'.
+
+#   e). Logical selection: 
+
+        a = c(1,3,5)
+        a[c(T,F,T)]
+        b = c(T,F,T);  a[b]  
+        a>2;  
+        a[a>2]      
+        b = (a>2);  a[b] 
+
+#       Caution: If the index vector is not of equal length,
+#       it will be cyclically repeated:
+
+        a[F]             # c(F,F,F)   'F' is repeated 3 times
+        a[T]             # c(T,T,T)
+        a[c(T,F)]        # c(T,F,T)   
+        a[c(T,T,F,F,F)]  # If too long, the index vector is truncated.
+        (1:12)[c(T,T,F)] # Leave out every third item.
+        # (The above scheme can be used to create arbitrary repeat patterns.)
+
+#   f). Vectors can be indexed repeatedly:
+
+          a[c(1,3)][2]     # Select item two of a[c(1,3)], i.e. item 3 of 'a'.
+
+#         (Looks like a matrix element in C, but isn't!!)
+
+          (a[c(1,3)])[2]   # This is what the previous expression really means.  
+
+#         Think of a[c(1,2)] as the result of some selection function.
+
+           a[c(1,3)][c(1,2,1,2)]
+
+#   g). Vector indexing and subsetting can be used for assignment:
+
+        a[1:2] = c(10,20);  a    # Print 'a' to see the effect of the assignment.
+        a[c(1,3)] = c(100,200);  a
+        a[-2] = c(1000,2000);  a
+        a[c(F,T,T)] = c(10000,20000);  a
+        a[2:3] = 0;  a    # "0" is repeated to fill both vector elements.
+        b = 1:10
+        b[3:6] = c(10,20); b # "c(10,20)" is cyclically repeated.
+
+#     If the length does not divide, there is a warning message,
+#     but cyclical fill-in is done anyway.
+#
+#############################################################
+#
+#
+#                HANDLING MISSING VALUES
+#
+############################################################
+#
+#      This is useful when working with data contining missing values (NA).
+#      The method is usually combined with logical constants like is.XXX (argument)
+#      where argument = NA (missing value), NaN = "not a number", Inf = infinity, etc.
+#      Folloing example explains how this method works:
+
+       x=c(12,22,13,NA, 25,16,17,NA,21)
+       sum(x)                     # result is NA
+
+#     I want to remove missing values in vector x:
+
+       rm.na = c(T,T,T,F,T,T,T,F,T)
+       x.no.na = x[rm.na]
+       x.no.na
+
+#      How to get vector automatically for any given data (vector)? we use logic constant: is.na() or !is.na()
+#      See the difference between is.na(x) and !is.na(x):
+
+       is.na(x)
+       !is.na(x)
+
+#      The easy way for removing NA in a vector x is to use following command:
+
+       x[!is.na(x)]
+
+#
+#    Alternatively, you can also use a built-in function na.omit() to remove all NAs in the vector
+
+     na.omit(x);             #  retur numeric vector and two other attributes: na.action() and class()
+     as.vector(na.omit(x))   #  returns a vector only.
+     na.action(na.omit(x))   #  returns the indices of missing values
+     class(na.omit(x))       #  returns the name of the class of na.omit(), it this case, it returns "numeric".
+
+#    na.omit() also works on matrices and dataframes. In each of these cases, na.omit() will delete all
+#    records (rows) containing at least one NA. Unfortunately, it doesn't work for lists. More details to follow.
+#
+#    Several other powerful functions are also very commonly in dealing with vectors:
+#    
+#    which()               # gives the index of components satifying certain selection criterion. 
+                           # Note: which(x==NA) does not work since missing values are not values. Therefore,
+                           # NA == NA with produce NA, not a logical value (TRUE/FALSE).
+     any()                 # Given a set of logical vectors, is at least one of the values true?
+#    unique()              # remove the replicated values in vector
+#    duplicated()          # determine the duplicated elements. it returns a logical vector.
+#
+#############################################################
+#
+#   INDEX VECTOR, RANKING, SORTING, REVERSING AND PERMUTING
+#
+##############################################################
+
+## 
+#  01: Built-in functions tha rearrange the conponents of a vector
+        x = c(5:1,5:10);  
+        x
+        rank(x)
+        sort(x)
+        rev(x)
+        sample(x)                         # random permutation of 'x'; can also
+        sample(x, size=100, replace=T)    # random sample of size 100 w. replt.
+        sample(x, size=100)               # why does this not work?
+
+
+#   02: Index vector of a given SORTED vector
+#       An index vector of a vector is useful particularly when you work with
+#       values of the vector according to the index (the physical location of 
+#       the value in the vector.
+
+        x=c(1,2,5.1,6.2,4.2,3.1,2)
+        idx =order(x)         # this is vector of the physical locations of the
+                              # sorted values in the original vector!
+#       we can also use the option in sort() to obtain this index vector
+        idx = sort(x, index.return=T)    # same as the one obtained  in order(x)!
+
+#   03:  Sorts also character data lexicographically:
+         x = sample(letters)         # permute letters
+         x                          
+         sort(sample(letters))        
+          
+
+#   04: A parallel sorting is useful when you have a data set with multiple variables, 
+#       if you want to sort one of the variables, you must sort other variables accordingly 
+#       to avoid messing up your data. Following example shows how you perform parallel sorting:
+
+         x = runif(10)
+         y = -x - 100         # 'y' is just another vector of the same length as 'x'.
+         x; y                  # Unordered parallel vectors
+         ord = order(x)
+         x[ord]; y[ord]  # Sorts both "x" and "y" in ascending order of "x".
+#
+#
+########################################################
+#
+#       APPLICATION:  RANDOM SPLITTING A DATASET  
+#
+########################################################
+
+#
+#  In statistical modeling, we ocassional split the sample into several subsamples and use these
+#  subsamples for different purposes. R function sample() can be used for splitting samples in two steps:
+#  1. split the index of vector into several subsets, 2). use the subsets of indicies to split the original data
+#  Example: we split the following random sample into 3 subsamples: 50%-25%-25%
+#           three subsample sizes n1 = 153*50% = 77, n2=38, n3 = 38.
+
+    dat=rnorm(153,mean=100,sd=25)
+    permu=sample(1:153, replace = FALSE)
+    rand.sample.01=dat[permu[1:76]]
+    rand.sample.02=dat[permu[76+(1:38)]]
+    rand.sample.03=dat[permu[(76+38)+(1:37)]]
+    dat
+    permu
+    rand.sample.01
+    rand.sample.02
+    rand.sample.03
+
+#   
+######################################################
+#
+#              SET OPERATIONS
+#
+####################################################
+
+# 
+#   Commonly used set operations are listed below with examples.
+#    
+     x=1:10
+     y=5:15
+     union(x, y)
+     intersect(x, y)
+     setdiff(x, y)
+     setdiff(y, x)
+     setequal(x, y)         # returns a logical value T/F
+
+     is.element(5, x)
+     is.element(13, x)
+
+#    Binary operation %in% is useful when working with control statements since it does not return NAs.
+#    x %in% table   # table = vector or NULL: the values to be matched against.
+      
+      1:10 %in% c(1,3,5,9)
+
+#
+#
+########################################################
+#
+#    SOME FUNCTIONS THAT CREATE PATTERNED VECTORS
+#
+########################################################
+
+
+#   01:  Manual entry of a vector:
+         x = c(-1,2,5)               # c() is a built-in function
+#    
+#   02:  Equispaced sequences of numbers:
+          3:10
+          10:3
+          seq(3, 10)
+          seq(3, 10, by=1/3)   # Third argument is names "by"
+          seq(3, 10, len=8)
+          seq(letters)         # List of indexes into 'letters'
+#
+#   03: Repetitions:
+          rep(3, 10)
+          rep(1:3, 5)
+
+#       Here is something more complex that "rep" can also do:
+          rep(c(1,2,3,4), c(2,3,2,4))
+          rep(1:3, rep(2,3))
+#    
+#   04: Logical values:
+          rep(T,5)
+          ((1:10) > 5)
+          (1:10)[(1:10) > 5]
+#    
+#   05: Random numbers:
+        x = runif(5);  x     # Five uniform random numbers in [0,1]; see below.
+        y = rnorm(5);  y     # Five standard normal random numbers; see below.
+#
+#   06: Random permutations and samples:
+        x = sample(10);  x      # Random permutation of the numbers 1,2,...,10.
+
+#       sample() can also do sampling with replacement...
+
+        sample(letters, 10, replace=T)     # This is aslo called the well-known Bootstrap resample!
+
+#   07: Read a data to R: 
+#       Two most commonly used built-in functions: scan() and read.table()
+##      scan() reads data by rows and saves as a vector!!!
+
+        larynx.s0 = scan("http://people.usm.maine.edu/cpeng/sta589/larynx.txt", n=100)  # First n values
+        larynx.s1 = scan("http://people.usm.maine.edu/cpeng/sta589/larynx.txt")         # Reads 450 numbers
+        larynx.s2 = scan("G:\\Spring2014\\STA574\\574\\larynx.txt")
+        larynx.s3 = scan("G:/Spring2014/STA574/574/larynx.txt")
+
+##      read.table() and its variants read data by rows and save it as dataframe!
+        larynx0 = read.table("http://people.usm.maine.edu/cpeng/sta589/larynx.txt")
+        larynx1 = read.table("G:\\Spring2014\\STA574\\574\\larynx.txt")
+        larynx2 = read.table("G:/Spring2014/STA574/574/larynx.txt")
+
+#
+# 08: AUTOMATIC VECTOR EXTENSION:
+#
+#      Array-bound errors for vectors do NOT exist for positive indexes!!!   
+#      Vectors are shown as NA if indexed out of bounds, and
+#      automatically extended if assigned out of bounds.
+
+        x = runif(5)      # x has length 5.
+        x[6]              # NA, not an error message.
+        x[10] = 9.99      # Not an error!  Element 10 now exists.
+        x                 # So do elements 6,7,8,9, filled in with NA.
+        length(x)         # Assignment can extend the length.
+
+#     However, negative indexes (used for exclusion!!!!) can be out of bounds:
+
+        x[-11]           # Out of bounds.
+        x[-9]            # Ok, due to fill-in after assigning element 10.
+
+#     Automatic vector extension makes vectors very different from
+#     matrices and arrays, for which automatic extension does not exist.
+#
+
+
+#####################################
+#
+#     NAMED VECTOR ELEMENTS
+#
+#####################################
+
+#   01:  Vector elements can be named:
+          x = c(first=1,second=3,third=5,fourth=7);   
+          x
+
+#   02:  Equivalently, naming elements can be performed in a separate step
+#        by assigning the "names()" attribute:
+          x = c(1,3,5,7)
+          names(x) = c("first","second","third","fourth") 
+          x
+          names(x)
+
+#   03:  Element names can be used for indexing/subsetting:
+          x["second"]
+          x[c("second","fourth")]
+          nm = c("second","third","second","third");  
+          x[nm]
+
+#   04:  Named assignment/extension is possible:
+          x[c("fifth","fourth")] = c(10,11);  
+          x
+
+#         Note: "fourth" existed and is re-assigned;
+#               "fifth" did not exist and is an extension of "x".
+#   05:  If names are not unique, the first matching name is selected:
+          c(a=1,b=2,a=3)["a"]
+
+#   06:  Example of automatic use: 'table()'
+          x = sample(letters,size=1000,replace=T)
+          table(x)          # this is a new object!
+                            # it produces a frequency table
+                            # one can access the frquencies of the table!
+#
+#  
+##############################################################
+#
+##   SIMPLE CALCULATIONS USING BUILTIN STAT/MATH FUNCTIONS
+#
+###############################################################
+
+# 01:  SIMPLE STATISTICS:
+        length(x)
+        sum(x)
+        mean(x)
+        var(x)
+        sd(x)
+        min(x)
+        max(x)
+        range(x)
+        median(x)
+
+#
+# 02:  CUMULATIVE OPERATIONS:
+        x = 1:10
+        cumsum(x)
+        cumprod(x)
+        x = 1:10 * c(1,-1)
+        cummax(x)
+        cummin(x)
+
+#
+# 03:  SIMPLE NUMERIC FUNCTIONS/TRANSFORMATIONS:
+#     Most functions that accept one number and return another number
+#     will naturally "vectorize" in R, namely, apply element by element.
+        x = runif(20, min=-10, max=+10)
+        round(x)
+        trunc(x)
+        ceiling(x)
+        abs(x)    
+        sqrt(x)           
+        log(x^2)
+        exp(1)
+        exp(x/100)
+        cos(pi)               #   "pi" is predefined; the number e=exp(1) is not.
+        acos(0.5)             #   What is 'acos()'?
+#
+#
+######################################## 
+########################################
+#
+#              MATRICES 
+#
+########################################
+########################################
+
+#  01: DEFINITION
+#      Matrices in R are vectors with additional "meta-information"
+#      to structure them in a rectangular form.  
+#      The elements of the vector fill the matrix column by column or
+#      row by row. See following examples
+
+        matrix(1:12, ncol=4)           # Column major (default)
+        matrix(1:12, nrow=3)           # Same; ncol is inferred
+        matrix(1:12, ncol=4, byrow=T)  # Row major, forced with "byrow".
+        matrix(1:12, nrow=3, byrow=T)  # Same
+        matrix(0:1, nrow=2, ncol=4)    # What happened?
+        matrix(0, nrow=2, ncol=4)      #     "
+        matrix(letters, ncol=2)        # Elements are now of type 'character'.
+        matrix(paste("Letter",letters), ncol=2)
+
+#      When reading data in text files, 'byrow=T' is needed 
+#      for row-by-row input (download 'laser.dat' from the course page first):
+
+        m = matrix(scan("Data/laser.dat", skip=1), ncol=4, byrow=T)
+        m
+ 
+#      "skip=1" in scan() tells scan() to skip first line.
+
+#      'read.table()' is a more convenient function for reading
+#      tabular data.
+
+#  02: TESTING AN OBJECT AS A MATRIX
+#       Whether something is a matrix can be checked with 'is.matrix()':
+        is.matrix(matrix(1:12,3)) 
+        is.matrix(1:12)
+        x = 2;     is.matrix(x)
+        x = 1:10;  is.matrix(x)
+        x = matrix(0, nrow=3, ncol=5);  is.matrix(x)
+        is.matrix(matrix(0, nrow=3, ncol=5))  
+#
+#  03: COERCING A TABULAR OBJECT TO A MATRIX
+#      as.matrix() does the trick!
+
+         larynx0 = read.table("http://people.usm.maine.edu/cpeng/sta589/larynx.txt")
+         is.matrix(larynx0)
+         larynx.01=as.matrix(larynx0)
+         is.matrix(larynx.01)
+
+#  04:   The dimension attribute: it is the sole difference between
+#        a vector and a matrix.  It can be queried:
+
+          dim(m)                     # Vector of length 2 with the two dimensions.
+          dim(m)[1];  dim(m)[2]      # Each dimension separately.
+          nrow(m);  ncol(m)          # Same.
+
+#        Vectors can be turned into matrices by assigning the
+#        dimension attribute:
+           m = 1:12                  # Just a vector.
+           dim(m) = c(3,4)           # Now a matrix.
+           m
+           is.matrix(m)              # TRUE
+           dim(m) = NULL             # Stripping to a vector.
+           m
+           is.matrix(m)              # FALSE
+
+#  05:  The dimension name attributes: row- and col-names
+          colnames(m) = letters[1:4]
+          rownames(m) = LETTERS[1:3]
+          m
+          colnames(m)
+          rownames(m)
+
+#  06:  Indexing/subselecting rows and columns:        (differs from C!)
+        m = matrix(1:12, ncol=4)
+        m[1,4]                    # Element in row 1, column 4.
+        m[1:3,]                   # First 3 rows.
+        m[,3:4]                   # Last 2 columns.
+        m[1:3,3:4]                # Submatrix of size 3x2 (unlike Python!)
+        m[c(1,2,1,2),]            # Repeat rows 1 and 2.
+        m[,c(1,2,1,2)]            # Repeat columns 1 and 2.
+        m[c(1,2,1,2),c(1,2,1,2)]  # Repeat left-upper 2x2 matrix 4 times.
+        m[-1,]                    # Select all but the first row.
+        m[,-c(2,4)]               # Select all but columns 2 and 4.
+        m["A",]                   # Only works if col/rownames have been assigned.
+        m[c("A","C"),]
+        m[c("A","C"),"a"]
+
+#  07: ATTENTION: Selection of individual rows and cols generates ONLY vectors
+
+         m[,1]
+         is.matrix(m[,1])
+         is.matrix(m[1,])
+         is.vector(m[,1])
+         is.vector(m[1,])
+#
+#      Coercion of a vector to a matrix:
+
+         m10=as.matrix(m[1,])
+         m10
+#      
+#        Coercion of a matrix to a vector:
+
+         v1=as.vector(m)
+         is.matrix(v1)
+         is.vector(v1)
+         m
+         v1
+#
+#  08:  Index/subsetting can be used for assignment:
+           m[1,2]     = 0
+           m[1,]      = 11:14
+           m[,1]      = 0
+           m[1,c(F,F,T,T)]   = c(7,10)
+#
+#  09: Associative array feature for matrices:
+         rownames(m) = c("x","y","z")        # like 'names(vec)'
+         colnames(m) = c("a","b","c","d")
+         m["x","d"]           # number
+         m["x",]              # vector
+         m[,"c"]              # vector
+         m[c("x","z"),c("c","a")]   # submatrix (different from Python!)
+         m[c("x","z","x","y"),c("c","a","a")] # col-row-rearrangement
+
+#  10:  Column and row binding:
+#      Two functions that permit collecting cols and rows to form matrices.
+
+        x = runif(5)                     # Play data.
+        cbind(1:5, x, x, rep(10,5))      # Column binding.
+        rbind(1:5, x)                    # Row binding.
+
+#      (Vectors are NOT thought of as columns or rows on their own;
+#      they take on these roles inside the "cbind" and "rbind" functions.)
+#      Both functions accept an arbitrary number of conforming arguments.
+#      You can also bind whole matrices:
+
+        cbind(rbind(1:3,11:13,21:23), cbind(1001:1003,2001:2003))
+
+#     A more friendly way of writing the same is:
+
+        m1 = rbind(1:3,11:13,21:23)         # 3x3
+        m2 = cbind(1001:1003,2001:2003)     # 3x2
+        cbind(m1, m2)                       # 3x5
+
+#     Conforming for 'cbind()' means the arguments have equal number
+#     of rows, for 'rbind()' it means equal number of columns.  
+#     If vector arguments are not conforming, R extends them cyclically
+#     or clips them but may give you a warning if the shorter arguments
+#     are not of fractional length of the longest argument:
+
+        cbind(1:3,0)                # second arg has size 1, = fraction of 3
+        cbind(1:6,1:3)              # size 3 is a fraction of size 6
+        cbind(1:3,1:2)              # size 2 is not a fraction of size 3 => warning
+        cbind(1:3,matrix(11:14,2))  # clipping: the second arg dictates nrow
+
+#
+#   11: Some useful functions for generating patterned matrices:
+        diag(5)
+        outer(1:3,1:4)                         # a matrix with element to the product of 
+                                               # of the two subscripts (indices) 
+        outer(1:3,1:4, FUN=paste, sep="")      # produce an index matrix
+        x = outer(1:3,1:4)
+        row(x)
+        col(x)
+        row(x)>col(x)
+        x[row(x)>col(x)]
+
+#  12:   HANDLING MISSING VALUES IN MATRICES: most of the commands we introduced in 
+#        handling missing values in vectors can be used for matrices. 
+#
+#
+#
+#############################################################
+#
+#       APPLY A FUNCTION TO A LIST, VECTOR OR MATRIX
+#
+#############################################################
+
+# 01.  lapply(): returns a list of the same length as X, each element of 
+#     which is the result of applying FUN to the corresponding element of X.
+#     Example:
+
+       ls.a = list(x1=1:5, x2=5:13, x3=-7:1)
+       mtrx=matrix(1:25,ncol=5)
+       lapply(ls.a,mean)                  # calculate the mean of vectors x1, x2, and x3.
+       lapply(ls.a,mean, na.rm=TRUE)      # if missing is involved...
+
+#      sapply(): is a user firendly version of laaply() and wrapper of lapply() 
+#      by default returning a vector, matrix or, if simplify="array", an array if appropriate, 
+#      by applying simplify2array(). sapply(x, f, simplify=FALSE, USE.NAMES=FALSE) 
+#      is the same as lapply(x,f). 
+
+       sapply(ls.a,mean, simply=TRUE)
+       sapply(ls.a,mean, simply=TRUE, USE.NAME=TRUE)
+
+# 02: apply(): applies aunctions over array margins: For a matrix, 1 = row margin, 2 = column margin 
+#       Example
+  
+        mtrx=matrix(1:25,ncol=5)
+        mtrx
+        apply(mtrx, MARGIN=1, FUN=mean)
+        apply(mtrx,2,mean)
+        apply(mtrx, MARGIN=1, FUN=sd, na.rm=TRUE)
+        apply(mtrx,2,sd,na.rm=TRUE)
+
+#
+# 03: aggregate(): computes summary statistics of data subsets. To be more specific,
+#     it splits the data into subsets, computes summary statistics for each, and returns 
+#     the result in a convenient form
+#     Examples: (taken from the help doc of aggregate() in library(stats):
+#
+#     Compute the averages for the variables in 'state.x77', grouped
+#     according to the region (Northeast, South, North Central, West) that
+#     each state belongs to.
+  
+      state.x77        # this is a built-in data set in library(stats).
+      state.region     # is a bult-in factor variable
+      aggregate(state.x77, list(Region = state.region), mean)
+#   
+#     Another example based on an artificial dataset
+#
+      x=1:25
+      y=x+rnorm(25,0,10)
+      grp=as.factor(rep(1:5,each=5)) 
+      dat.frm=cbind(x,y)
+      aggregate(dat.frm, list(grp.id=grp), mean)
+#
+
+
+#
+#
+#
+###################### END OF NOTE 02  ###################################
+##########################################################################
+
+
+
+
+

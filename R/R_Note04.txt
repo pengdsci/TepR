@@ -1,0 +1,287 @@
+
+############################################
+#
+#         Note 04: R GRAPHICS -Part I
+#
+#   Basic Graphics in Descriptive Statistics 
+#
+############################################
+#
+#    WORKING DATA SET: 32 passenger cars (different makers and different models) are randomly selected
+#                      from Berlin City Auto Group in Maine. We record the following information from 
+#                      each of the 32 cars: mpg, car weight and number of cylinders;
+
+mpg=c(21.0, 21.0, 22.8, 21.4, 18.7, 18.1, 14.3, 24.4, 22.8, 19.2, 17.8, 16.4, 17.3, 15.2, 10.4, 10.4,
+14.7, 32.4, 30.4, 33.9, 21.5, 15.5, 15.2, 13.3, 19.2, 27.3, 26.0, 30.4, 15.8, 19.7, 15.0, 21.4)
+
+car.wt=c(2.620, 2.875, 2.320, 3.215, 3.440, 3.460, 3.570, 3.190, 3.150, 3.440, 3.440, 4.070, 3.730,
+3.780, 5.250, 5.424, 5.345, 2.200, 1.615, 1.835, 2.465, 3.520, 3.435, 3.840, 3.845, 1.935,
+2.140, 1.513, 3.170, 2.770, 3.570, 2.780)
+
+num.cyl=c(6, 6, 4, 6, 8, 6, 8, 4, 4, 6, 6, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 8, 8, 8, 8, 4, 4, 4, 8, 6, 8, 4)
+ 
+#    We will use this data throughout the note to illustrate the commands for making various R graphics
+#
+#  01: OPEN R GRAPHIC WINDOWS
+#      Following commands open R graphic windows:
+
+       windows()              # open an active graphic window
+       X11()                  # open another active graphic window and turn 
+                              # all previously graphic windows inactive!
+       plot.new()             # erase all graphs in the currently active window for new graphics
+       dev.set()              # switch status of activity among opened graphic windows sequentially
+       dev.off()              # shut downs the open graphic windows sequentially.
+
+#  02: CONTROLLING LAYOUT OF THE GRAPHIC WINDOWS 
+#      The par() function for querying and setting plotting parameters.
+       help(par)
+#
+#      Some important parameters to set:
+          par(pin=c(5, 4),          #   plot width and height in inches
+              mfrow=c(3,4),         #   3x4 layout of 12 plots, filling rows first (mfcol)
+              mgp=c(1, 0, 0),       #   distance of axis title ("x","y"),
+                                    #   numbers at the ticks, border line,
+                                    #   (in margin lines)
+              mar=c(1,2,3,4),       #   margins: bottom-left-top-right (in lines)
+              oma=c(1,1,1,1),       #   outer margin around the collection
+                                    #   of plots on the page (in lines)
+              mex=0.8,              #   expansion of margin line width,
+                                    #   relative to default
+              cex=0.8)              #   expansion of characters, relative to default
+#
+#      The rest of parameters of par() can be found in the help doc in R by typing ?par.
+#      You can use these parameters to design a fancy graphic page!
+#
+#  03: PLOTTING FUNCTION plot():
+#      The basic parameters in plot() are given below
+#    
+#      plot(x.coordinate, y.coordinate,
+#          type = ...  ,   #  "l" = line, "s"=step function (horizontal first)
+#                          #  "S" = step function (vertical first), "h"=high density (needle) plot
+#                          #  "p" = points, "b" = both points and lines, "o" = over-plotting of points and lines
+#          lty = ...   ,   #  line types such as 0 = "blank", 1 = "solid", 2 = "dashed", 3 = "dotted", 
+#                          #  4 ="dotdash", 5 = "longdash" or 6 ="twodash", etc.
+#          lwd = ...   ,   #  width of the line, using code 1 ,2 ,3 ....
+#          pch = ...   ,   #  point types / characters, coding 1-25. See the following example.
+#          col = ...   ,   #  color code, there are hundreds of different colors in R. More detail to follow.
+#          ylim = ...  ,   #  scale interval limits of y-axis, 
+#          xlim = ...  ,   #  scale interval limits of x-axis, 
+#          xlab = ...  ,   #  Label of x-axis
+#          ylab = ...  ,   #  Label of y-axis
+#          main = ...  ,   #  overall title of the plot
+#          cex = ...   ,   #  font size of the text on the plot.
+#          ...             #  and many more......
+#          )
+#
+#          Example 1: Scatter plot - mpg v.s. car.wt
+           
+           plot(car.wt, mpg, main = "Car Weight v.s. MPG",
+                xlab="Car Weight",
+                ylab="MPG",
+                )
+
+#          Next we want adddifferent colors and point types to the above plot based on the number 
+#          cylinders:  4 = "red", 6="blue", 8="darkgreen": We need to used the index of variable
+#          num.cyl to identify the corresponding points in the above plot:
+            
+           red.pt=which(num.cyl==4)
+           blue.pt=which(num.cyl==6)
+           green.pt=which(num.cyl==8)         
+           points(car.wt[red.pt], mpg[red.pt], col="red", pch=15, cex=1.3)
+           points(car.wt[blue.pt], mpg[blue.pt], col="blue", pch=17,cex=1.3)
+           points(car.wt[green.pt], mpg[green.pt], col="darkgreen", pch=18,cex=1.3)
+#
+           legend(4,30, c("cylinder: 4", "cylinder: 6","cylinder: 8"),pch=c(15,17,19), col=c("red","blue", "darkgreen"), bty="n")
+           text(2,10,"Created by C. Peng, 1/19/14", col="red", cex=0.6)
+#
+#  04: 3D SCATTER PLOT: scatterplot3d() in library(scatterplot3d)  
+#
+#         scatterplot3d(x, y=NULL, z=NULL, color=par("col"), pch=NULL,
+#                      main=NULL, sub=NULL, xlim=NULL, ylim=NULL, zlim=NULL,
+#                      xlab=NULL, ylab=NULL, zlab=NULL, scale.y=1, angle=40,
+#                      axis=TRUE, tick.marks=TRUE, label.tick.marks=TRUE,
+#                      x.ticklabs=NULL, y.ticklabs=NULL, z.ticklabs=NULL,
+#                      y.margin.add=0, grid=TRUE, box=TRUE, lab=par("lab"),
+#                      lab.z=mean(lab[1:2]), type="p", highlight.3d=FALSE,
+#                      mar=c(5,3,4,3)+0.1, col.axis=par("col.axis"),
+#                      col.grid="grey", col.lab=par("col.lab"),
+#                      cex.symbols=par("cex"), cex.axis=0.8 * par("cex.axis"),
+#                      cex.lab=par("cex.lab"), font.axis=par("font.axis"),
+#                      font.lab=par("font.lab"), lty.axis=par("lty"),
+#                      lty.grid=par("lty"), lty.hide=NULL, lty.hplot=par("lty"),
+#                      log="", ...)
+#
+#       Example:
+
+           library(scatterplot3d)
+           my3d=scatterplot3d(num.cyl,car.wt,mpg, main="My 3D Scatterplot")
+           # Adding colors to the 3D based on the number of cylinders
+           red.pt=which(num.cyl==4)
+           blue.pt=which(num.cyl==6)
+           green.pt=which(num.cyl==8)         
+           my3d$points(num.cyl[red.pt], car.wt[red.pt], mpg[red.pt], col="red", pch=19)
+           my3d$points(num.cyl[blue.pt], car.wt[blue.pt], mpg[blue.pt], col="blue", pch=19)
+           my3d$points(num.cyl[green.pt], car.wt[green.pt], mpg[green.pt], col="darkgreen", pch=19)
+
+#       We can also add text contents and legends to the above 3d plot
+        
+          text(my3d$xyz.convert(c(4.3,6,8), c(1,3,5), c(25,25,20)), labels=c("4", "6","8"), cex=1.5, lwd=2) 
+          legend(my3d$xyz.convert(4,6,35), c("Cyliender: 4", "Cylinder: 6","Cylinder: 8"), 
+                 pch=c(19,19,19),col=c("red","blue","darkgreen"), cex=0.8, bty="n") 
+#
+#
+#
+#  05: HISTOGRAMS hist()
+#
+#      There two types of histograms: frequency and relative frequency based histograms.
+##     Default S3 method:
+
+#        hist(x, breaks = "Sturges",
+#             freq = NULL, probability = !freq,
+#             include.lowest = TRUE, right = TRUE,
+#             density = NULL, angle = 45, col = NULL, border = NULL,
+#             main = paste("Histogram of" , xname),
+#             xlim = range(breaks), ylim = NULL,
+#             xlab = xname, ylab,
+#             axes = TRUE, plot = TRUE, labels = FALSE,
+#             nclass = NULL, warn.unused = TRUE, 
+#             ...)
+#
+
+       windows(8,6)
+       par(mfrow=c(2,2))
+       hist(mpg, breaks=5,density=50, col=rainbow(7), main="Frequency Histogram: MPG")
+       hist(mpg, prob=TRUE,breaks=5,  col=rainbow(7), main="Relative Frequency Histogram: MPG")       
+       lines(density(mpg), col="darkblue", lwd=2, lty=2)
+       hist(car.wt, breaks=5,density=90, col=rainbow(9), main="Frequency Histogram: Car Weight")
+       hist(car.wt, prob=TRUE,breaks=5,  col=rainbow(9), main="Relative Frequency Histogram: Car Weight")       
+       lines(density(car.wt), col="darkblue", lwd=2, lty=2)
+       box(which="outer", col="red", lwd=5)
+#    
+#      lines(), points, text(), title(). legend(), ... add new information only to the plot generated
+#      by the commpand plot() immediately before the current command line.      
+#
+# 06: Bar chart and Pie chart for categorical data
+#
+#     Both bar chart and pie chart are used for chracterizing the distribution for categorical variables.
+#     We next to use variable cyl to illustrate how to create bar chart and pie chart:
+#
+#        barplot(height, width = 1, space = NULL,
+                 names.arg = NULL, legend.text = NULL, beside = FALSE,
+                 horiz = FALSE, density = NULL, angle = 45,
+                 col = NULL, border = par("fg"),
+                 main = NULL, sub = NULL, xlab = NULL, ylab = NULL,
+                 xlim = NULL, ylim = NULL, xpd = TRUE, log = "",
+                 axes = TRUE, axisnames = TRUE,
+                 cex.axis = par("cex.axis"), cex.names = par("cex.axis"),
+                 inside = TRUE, plot = TRUE, axis.lty = 0, offset = 0,
+                 add = FALSE, args.legend = NULL, ...
+                )
+
+#        Example
+
+         freq.count=table(num.cyl)
+         barplot(freq.count, main="Cylinder Distribution", 
+                 horiz=FALSE, 
+                 names.arg=c("4 Cylinders", "6 Cylinders", "6 Cylinders"),
+                 density = 45, 
+                 angle = 30,
+                 col="blue"
+                )
+#
+#      
+#          pie(x, labels = names(x), edges = 200, radius = 0.8,
+#              clockwise = FALSE, init.angle = if(clockwise) 90 else 0,
+#              density = NULL, angle = 45, col = NULL, border = NULL,
+#              lty = NULL, main = NULL, 
+#               ...)
+#
+
+#         Example
+#
+          freq.count=table(num.cyl)
+          pie(freq.count,main="Cylinder Distribution", 
+              labels=c("4 Cylinders", "6 Cylinders", "6 Cylinders"),
+              density = NULL, angle = 45, col = rainbow(4)
+             )
+#
+#         Example for fun:
+
+         pie(1:1000, col=rainbow(500), border=NA, label="")
+#
+#
+#  07: Boxplot - graphic representation of five-number summary.
+#
+#          boxplot(x,   # numeric variable, if a numeric variabl variable is split into 
+#                       # several groups according to a categorical variable, formula
+#                       # numric.variable ~ group.variable.
+#                ..., 
+#                range = 1.5, width = NULL, varwidth = FALSE,
+#                notch = FALSE, outline = TRUE, names, plot = TRUE,
+#                border = par("fg"), col = NULL, log = "",
+#                pars = list(boxwex = 0.8, staplewex = 0.5, outwex = 0.5),
+#                horizontal = FALSE, add = FALSE, at = NULL
+#                )
+#
+#       Example:
+
+           boxplot(mpg)
+           boxplot(mpg~num.cyl)
+
+#
+#  08: Line plot
+#      Example: The is a set of age of death of 42 successive kings of England: 
+
+           kings.age = scan("http://robjhyndman.com/tsdldata/misc/kings.dat",skip=3)
+           n=length(kings.age)
+           plot(1:n,kings.age,type="b")
+#
+#
+#
+########################## END OF NOTE 04  ###################################
+##############################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

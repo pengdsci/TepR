@@ -1,0 +1,437 @@
+
+#################################################
+#
+#         Note 06: R GRAPHICS - Part II 
+#
+#################################################
+
+#  01: OPEN R GRAPHIC WINDOWS
+#      Following commands open R graphic windows:
+
+       windows()              # open an active graphic window
+       X11()                  # open another active graphic window and turn 
+                              # all previously graphic windows inactive!
+       plot.new()             # erase all graphs in the currently active window for new graphics
+       dev.set()              # switch status of activity among opened graphic windows sequentially
+       dev.off()              # shut downs the open graphic windows sequentially.
+
+#  02: CONTROLLING LAYOUT OF THE GRAPHIC WINDOWS 
+#      The par() function for querying and setting plotting parameters.
+       help(par)
+#
+#      Some important parameters to set:
+          par(pin=c(5, 4),          #   plot width and height in inches
+              mfrow=c(3,4),         #   3x4 layout of 12 plots, filling rows first (mfcol)
+              mgp=c(1, 0, 0),       #   distance of axis title ("x","y"),
+                                    #   numbers at the ticks, border line,
+                                    #   (in margin lines)
+              mar=c(1,2,3,4),       #   margins: bottom-left-top-right (in lines)
+              oma=c(1,1,1,1),       #   outer margin around the collection
+                                    #   of plots on the page (in lines)
+              mex=0.8,              #   expansion of margin line width,
+                                    #   relative to default
+              cex=0.8)              #   expansion of characters, relative to default
+#
+#      The rest of parameters of par() can be found in the help doc in R by typing ?par.
+#      You can use these parameters to design a fancy graphic page!
+#
+#  03: PLOTTING FUNCTION plot():
+#      The basic parameters in plot() are given below
+#    
+#     plot(x.coordinate, y.coordinate,
+#          type = ...  ,   #  "l" = line, "s"=step function (horizontal first)
+#                          #  "S" = step function (vertical first), "h"=high density (needle) plot
+#                          #  "p" = points, "b" = both points and lines, "o" = over-plotting of points and lines
+#          lty = ...   ,   #  line types such as 0 = "blank", 1 = "solid", 2 = "dashed", 3 = "dotted", 
+#                          #  4 ="dotdash", 5 = "longdash" or 6 ="twodash", etc.
+#          lwd = ...   ,   #  width of the line, using code 1 ,2 ,3 ....
+#          pch = ...   ,   #  point types / characters, coding 1-25. See the following example.
+#          col = ...   ,   #  color code, there are hundreds of different colors in R. More detail to follow.
+#          ylim = ...  ,   #  scale interval limits of y-axis, 
+#          xlim = ...  ,   #  scale interval limits of x-axis, 
+#          xlab = ...  ,   #  Label of x-axis
+#          ylab = ...  ,   #  Label of y-axis
+#          main = ...  ,   #  overall title of the plot
+#          cex = ...   ,   #  font size of the text on the plot.
+#          ...             #  and many more......
+#          )
+#
+#
+#      Example: List of all possible point types in R:
+
+       windows(width=10, height=3)    # the arguments specify the layout (size) of the graphic window
+       plot(1:25, rep(1,25), pch=1:25, col=1:24, xlab="", ylab=" ", yaxt="n", cex=2)
+                                      # yaxt="n" suppresses y axis, xaxt = "n" suppresses x-axis, 
+                                      # axes=FALSE suppresses both axes
+
+#  03: EDITING THE DEFAULT PLOT WITH LOWER LEVEL PLOTTING COMMANDS 
+#
+#      We illustrate these commands using following example:
+
+       x = seq(0, 2 * pi, length = 15)
+       y = sin(x)
+       plot(x, y, axes = FALSE, type = "b", pch = "*", xlab = NA, ylab = NA)
+
+#      A). DRAWING AXES
+# 
+         axis(side = 1,                     # 1 = x-axis (below the grap, 2 = y-axis (left), 3 = above, 4 = right
+              at = c(0,1,2,pi,4,5,2*pi),    # the location of the points at which tick-marks are to be drawn. 
+              labels = expression(0,1,2,pi,4,5,2*pi),  # scale at the tick marks defined above
+              pos=0,                        # position of the axis, in this case. x-axis is defined to be y = 0
+              lty= 1,                       # line types for both axis and tick marks
+              lwd = 1,                      # line width for both axis and tick marks 
+              col = 2:3,                    # colors for axis and tick marks respectively
+              font.axis = 4                 # Fonts can be one of 1, 2, 3 or 4 for normal, bold, italic and bold-italic.
+             )
+
+          axis(side = 2, 
+              at = c(-1, -0.5, 0, 0.25, 0.5, 0.75, 1),
+              col=3:4,    # color for axis labels
+              col.axis = 2,  
+              pos = 0,    # y-axis is x = 0,
+              las = 1,    #  orientation of axis-lables: 0 = parallel, 1 = horizontal, 2 = right angle to the axis, 3 - vertical
+              )
+
+#      B). PLOT ANNOTATION  
+#          The function title can be used to place labels in the margins of a plot.
+#
+#          title(main=str, sub=str, xlab=str, ylab=str)
+#
+#          The arguments are as follows:
+#          main : a main title to appear above the graph,
+#          sub : a subtitle to appear below the graph,
+#          xlab : a label for the x axis,
+#          ylab : a label for the y axis.
+
+           title( main = "Sine Curve",
+                  font.main = 3 ,            # choosen from 1-4
+                  col.main = "red"  ,
+                  cex=1.2  ,
+                  sub = "add subtitles here ....",   # you can use font.sub, col.sub, cex.sub options
+                  xlab = "x coordinates",            # you can use font.lab, col.lab, cex.lab options
+                  ylab = "y coordinates"
+
+                )
+#
+#        C). FRAMING
+#          It can be useful to draw a box around a plot. This can be done with the function box. The call
+
+           box()
+
+#          draws a box around the plot region (the region within the plot margins). The call
+
+           box("figure", col = "blue")
+
+#          draws a box around the figure region (the region containing the plot and its margins).
+#          An optional col argument makes it possible to specify the colour for the box.
+#
+#       D). DRAWING POINTS
+#           The basic call has the form:
+#
+#           points(x, y, pch=22, col= 3)
+#
+#          where:
+#          1). pch specifies the plotting symbol. Values 1 to 25 are  special graphical symbols, 
+#              values from 33 to 126 are taken to ASCII codes. A quoted character will also work,
+#          2). col gives a colour specification. Examples are, "red", "lightblue", etc.
+#          
+#      E). DRAWING CONNECTED LINE SEGMENTS
+#          The basic call has the form:
+
+           lines(x, y, lty=2,  lwd=2, col="red")
+           lines(x, y, type="s", lty=2, lwd=1, col="blue")
+           lines(x, y, type="S", lty=3, lwd=2, col=6)
+
+#          where:
+#          1).  lty specifies the line texture. It should be one of "blank", "solid", "dashed", 
+#               "dotted", "dotdash", "longdash" or "twodash".
+#          2).  Alternatively the length of on/off pen stokes in the texture. "11" is a high density 
+#               dotted line, "33" is a short dashed line and "1333" is a dot-dashed line.
+#          3).  lwd and col specify the line width and colour.
+#
+#       F). DRAWING STRAIGHT LINES
+#           The basic call has the forms:
+
+            abline(a=0, b=1, lty=3, lwd=3, col="green")
+            abline(h=c(-0.25,0.25), col="pink")
+            abline(v=c(2,4,5), col="blue")
+
+#           where
+#           1). The a / b form specifies a line in intercept / slope form.
+#           2). h specifies horizontal lines at the given y values.
+#           3). v specifies vertical lines at the given x values.
+#           4). Line texture, colour and width arguments can also be given.
+#
+#       G). DRAWING DISCONNECTED LINE SEGMENTS
+#           The basic call has the form:
+#
+#              segments(x0, y0, x1, y1)
+#
+#           where
+#           1). The x0, y0, x1, y1 arguments give the start and end coordinates of the segments.
+#           2). Line texture, colour and width arguments can also be given
+#
+#           Example 1: Consider a figure which is created by taking a series of
+#           equally spaced points around the circumference of a circle
+#           and joining each of these points to all the other points.
+#
+             n = 17                                              # n = number of equal spaced vertices on the circle
+             theta = seq(0, 2 * pi, length = n + 1)[1:n]         # theta[1] = 0, theta[n+1] = 2*pi, sin(0) = sin(2*pi) 
+             x = sin(theta)                                      # x-coordinates of the vertices
+             y = cos(theta)                                      # y-coordinates of the vertices
+             plot.new()
+             plot.window(xlim = c(-1, 1), ylim = c(-1, 1), asp = 1)
+             for (i in 1:n){
+                for (j in i:n){
+                     col.num= 2 + j%%4                             # Use only 
+                     # cat("Color code =", col.num,"\n ")
+                     segments(x[i], y[i], x[j], y[j], col=col.num)
+                     Sys.sleep(0.5)
+                   }
+                }
+#
+#            You can change the number of vertices and the number of colors used in the graphic to get visual effects.
+#
+#            Example 2: Here is another example which shows how the eye can
+#            perceive a sequence of straight lines as a curve.
+
+              n=58
+              x1 = seq(0, 1, length = n)
+              y1 = rep(0, n)
+              x2 = rep(0, n)
+              y2 = seq(1, 0, length = n)
+              plot.new()
+              plot.window(xlim = c(0, 1),ylim = c(0, 1), asp = 1)
+              #  segments(x1, y1, x2, y2)                 # this command draws all line segment at once. We can add colors to it
+              for(i in 1:n){
+                  col.num=2+i%%4
+                  segments(x1[i], y1[i], x2[i], y2[i], col=col.num) 
+                 }
+              box(col = "grey")
+#
+#
+#           Example 3. Moving tangent lines on a sine curve:
+#
+             sine.tan.line = function(tt,d) {
+                   x=seq(-pi,pi,pi/18)
+                   y=sin(x)
+                   n=length(x)
+                   plot(0,0, xlim=c(-pi,pi), ylim=c(-1.1,1.1), xlab="",ylab="")
+                   title("Animated R Graphic Drawing")
+                   for (i in 1:(n-1)){
+                      segments(x[i],y[i],x[i+1],y[i+1], lwd=3, col=i)
+                      Sys.sleep(tt)
+                       }
+                   for(j in 1:(n-2)){     
+                        for (i in 1:(n-1)){
+                           segments(x[i],y[i],x[i+1],y[i+1], lwd=3, col=i)
+                          }
+                        xj=x[j+1]
+                        yj=y[j+1]
+                        s=cos(xj)    # slope of the tangent at (j+1)th point
+                        # (a1,b1) and (a2,b2) are end points of the line segment tangent to since curve.
+                        a1=(xj-sqrt(xj^2-(1+s^2)*(xj-d^2)))/(1+s^2) 
+                        b1=s*(a1-xj)+yj
+                        a2=(xj+sqrt(xj^2-(1+s^2)*(xj-d^2)))/(1+s^2)       
+                        b2=s*(a2-xj)+yj
+                        segments(a1,b1,a2,b2, lwd=3,col=j)
+                        Sys.sleep(tt/4)
+                        segments(a1,b1,a2,b2, lwd=3,col=colors()[1])
+                     }
+                   }
+            sine.tan.line(1,1)
+   
+#
+#       H). DRAWING ARROWS
+#           The basic call has the form:
+#
+#           arrows(x0, y0, x1, y1, code=int, length=num, angle=num)
+#
+#           where
+#           1). The x0, y0, x1, y1 arguments give the start and end coordinates of the arrows.
+#           2). code=1 – head at the start, code=2 – head at the end and code=3 – a head at both ends.
+#           3). length and angle – length of the arrow head and angle to the shaft.
+#           Example
+
+            plot.new()
+            plot.window(xlim = c(0, 1), ylim = c(0, 1))
+            arrows(.05, .075, .45, .9, code = 1, angle=60,col=2, length = 0.5)
+            arrows(.55, .9, .95, .075, code = 2, angle=30,col=3, length = 0.25)
+            arrows(.1, 0, .9, 0, code = 3, angle=10,col=4,     length = 0.125)
+            text(.5, 1, "A", cex = 1.5, col=2)
+            text(0, 0, "B", cex = 1.0, col=3)
+            text(1, 0, "C", cex = 0.5, col=4)
+
+#
+#      I). DRAWING RECTANGLES
+#          The basic call has the form:
+
+#          rect(x0, y0, x1, y1, col=str, border=str)
+
+#          where
+#          1). x0, y0, x1, y1 give the coordinates of diagonally opposite corners of the rectangles.
+#          2). col and border specify the colour of the interior and border of the rectangles.
+#          3). line texture and width specifications can also be given.
+#          Example: The following code illustrates how a barplot or histogram could be constructed.
+
+           plot.new()
+           plot.window(xlim = c(0, 5), ylim = c(0, 10))
+           rect(0:4, 0, 1:5, c(7, 8, 4, 3), col = 2:6)
+           axis(1)
+           axis(2, las = 1)
+
+#
+#      J). DRAWING POLYGONS
+#          The basic call has the form:
+
+#          polygon(x, y, col=str, border=str)
+
+#          where
+#          1).  x and y give the coordinates of the polygon vertexes. NA values separate polygons.
+#          2).  col and border specify the colour of the interior and border of the polygons.
+#          3).  line texture and width specifications can also be given.
+#          A simple example: 
+
+            x = c(0.32, 0.62, 0.88, 0.89, 0.59, 0.29)
+            y = c(0.83, 0.61, 0.66, 0.18, 0.36, 0.14)
+            plot.new()
+            plot.window(xlim = range(x), ylim = range(y))
+            polygon(x, y, col = "green")
+            box()
+
+#          A fancy example: Spiral squares
+#       
+           plot.new()
+           plot.window(xlim = c(-1, 1), ylim = c(-1, 1), asp = 1)
+           x = c(-1, 1, 1, -1)
+           y = c( 1, 1, -1, -1)  
+           polygon(x, y, col="beige")   # This is actually the unit sqaure!
+
+           vertex1 = c(1, 2, 3, 4)
+           vertex2 = c(2, 3, 4, 1)
+
+           for(i in 1:50) {
+               x = 0.9 * x[vertex1] + 0.1 * x[vertex2]
+               y = 0.9 * y[vertex1] + 0.1 * y[vertex2]
+               polygon(x, y, col="beige") 
+               Sys.sleep(1)
+             }
+#
+#      K). DRAWING TEXT
+#          The basic call has the form:
+#
+#          text(x, y, labels)
+#
+#          where
+#          1). x and y give the text coordinates.
+#          2). labels gives the actual text strings. Optionally,
+#          3). font and col give the font and colour of the text,
+#          4). srt and adj give the rotation and justification of the strings.
+#          An Example:
+
+           plot.new()
+           plot.window(xlim = c(0, 1), ylim = c(0, 1))
+           abline(h = c(.2, .5, .8), v = c(.5, .2, .8), col = "lightgrey")
+           text(0.5, 0.5, "srt = 45, adj = c(.5, .5)", srt=45, adj=c(.5, .5))
+           text(0.5, 0.8, "adj = c(0, .5)", adj = c(0, .5))
+           text(0.5, 0.2, "adj = c(1, .5)", adj = c(1, .5))
+           text(0.2, 0.5, "adj = c(1, 1)", adj = c(1, 1))
+           text(0.8, 0.5, "adj = c(0, 0)", adj = c(0, 0))
+           axis(1); axis(2, las = 1); box()
+#
+#
+#      L). DRAWING LEGEND
+#          A simple example has the form:
+#
+#          legend(xloc, yloc, 
+#                legend=text,
+#                lty=linetypes, 
+#                lwd=linewidths,
+#                pch=glyphname, 
+#                col=colours,
+#                xjust=justification, 
+#                yjust=justification
+#              )
+#
+#          where
+#           1). xloc and yloc give the coordinates where the legend is to be placed;
+#           2). xjust and yjust give the justification of the legend box with respect to the location. 
+#           3). The other values describe the legend contents.
+#
+#           The legend function is very flexible. Consult its manual entry for details.
+#
+#            Example
+#
+              xe = seq(-3, 3, length = 1001)
+              ye = dnorm(xe)
+              xa = seq(-3, 3, length = 201)
+              ya = dnorm(xa) + rnorm(201, sd = .01)
+              ylim = range(ye, ya)
+              plot.new()
+              plot.window(xlim = c(-3, 3), ylim = ylim)    #  layout of the graphic
+              lines(xe, ye, lty = "11", lwd = 2, col=2)           #
+              lines(xa, ya, lty = "solid", lwd = 1, col=3)        #
+              legend(3, max(ylim),
+                    legend = c("Exact", "Approximate"),
+                    lty = c("11", "solid"),
+                    lwd = c(2, 1),
+                    col = c(2,3),
+                    xjust = 1, 
+                    yjust = 1, 
+                    bty = "n"                              # no box on the legend text
+                   )
+              axis(1)                                      # add x-axis 
+              axis(2, las = 1)                             # add y-axis, label is horizontal
+              box()                                        # add a box to the graphic
+#
+#
+#      M). MULTIFIGURE LAYOUTS
+#          par() can be used to set up arrays of figures on the page. These
+#          arrays are then filled row-by-row or column-by-column.
+#          The following example declares a two-by-two array to be filled by rows and then produces the plots.
+
+           par(mfrow=c(2, 2))
+           plot(rnorm(10), type = "p")
+           plot(rnorm(10), type = "l")
+           plot(rnorm(10), type = "b")
+           plot(rnorm(10), type = "o")
+
+#          A two-by-two array to be filled by columns would be declared with
+
+           par(mfcol = c(2, 2))
+
+#
+#      N). ELIMINATING WASTE MARGIN SPACE
+#          It can be useful to eliminate redundant space from multi-way
+#          arrays by trimming the margins a little.
+
+           par(mfrow=c(2, 2))
+           par(mar = c(5.1, 4.1, 0.1, 2.1))
+           par(oma = c(0, 0, 4, 0))
+           plot(rnorm(10), type = "p")
+           plot(rnorm(10), type = "l")
+           plot(rnorm(10), type = "b")
+           plot(rnorm(10), type = "o")
+           title(main = "Plots with Margins Trimmed", outer = TRUE)  # "outer = TRUE" claims the over title. 
+#
+#         Here we have trimmed space from the top of each plot, and
+#         placed a 4 line outer margin at the top of of the layout.
+
+
+#############################  END OF NOTE 04 #############################
+###########################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

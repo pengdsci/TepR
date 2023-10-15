@@ -1,0 +1,363 @@
+
+#####################################################
+#
+#             Note 05: WRITING R FUNCTIONS  
+#
+#####################################################
+
+#  01:  INTRODUCTION
+#       Functions are created using the function() directive and are stored as R objects 
+#       just like anything else. In particular, they are R objects of class "function".
+
+           f = function(arguments) {
+                # Do something interesting
+             }
+
+#        a). Functions in R are "first class objects", which means that they can be treated much 
+#           like any other R object. Importantly, functions can be passed as arguments to other 
+#           functions.
+#
+#        b). Functions can be nested, so that you can dene a function inside of another function
+#
+#        The return value of a function is the last expression in the function body to be evaluated.
+#
+#        Functions have named arguments which potentially have default values:
+#        a). The formal arguments are the arguments included in the function denition
+#        b). The formals function returns a list of all the formal arguments of a function
+#        c). Not every function call in R makes use of all the formal arguments
+#        d). Function arguments can be missing or might have default values
+#
+#        EXAMPLES: simplest cases
+
+              fun1 = function(x) { plot(x) }
+              fun2 = function(x) { 2*x }
+
+#        Semantics 1: fun1 creates a 'side effect', plotting the input argument;
+#                     fun2 returns a result, the doubled input argument.
+
+               fun1(1:10)           # plots 1,2,...,10
+               fun2(1:10)           # returns the vector containing 2,4,...,20
+
+
+#        Semantics 2: Functions are 'first class citizens', that is,
+#                     they can be assigned, printed, passed as arguments,...
+
+                fun2                         # Print the function.
+                print(fun2)                  # Same.
+                funx = fun2;  funx(1:5)     # Application:   len = length;  len(1:10)
+
+
+
+#        Assignment:
+            x = fun2(1:10);  x   # Fine.
+            x = fun1(1:10);  x   # Assigns NULL, but plots.  'fun1()' is for side effect.
+
+#        Syntax: The following are equivalent ways of writing fun2().
+            fun2 = function(x) { 2*x }           # The original.
+            fun2 = function(x) 2*x               # Single statement bodies don't need braces.
+            fun2 = function(x) { return(2*x) }   # Make the return explicit.
+            fun2 = function(x) { y = 2*x;  y }   # Value of last statement is returned.
+            fun2 = function(x) { y = 2*x;  return(y) }   # Dito
+
+#
+#  02:  Functions with more arguments and complex bodies:
+
+            fun3 = function(x, y) {
+                  windows(width=5, height=5)
+                  par(mgp=c(1.8,.5,0), mar=c(3,3,2,1))
+                  plot(x, y, pch=16, cex=.5)
+                 }
+            fun3(1:100, rnorm(100))
+
+#       Function calls with named arguments: independent of order of arguments
+
+            fun3(y=rnorm(100), x=1:100)
+
+#       Functions with defaulted arguments: defaults can use preceding arguments
+
+           fun4 = function(y=rnorm(100), x=1:length(y), cex=.5, pch=16, w=5, h=5, new=T) {
+               if(new) windows(width=w, height=h)
+               par(mgp=c(1.8,.5,0), mar=c(3,3,2,1))
+               plot(x, y, pch=pch, cex=cex)  # 1st 'cex': argument name
+                                               # 2nd 'cex': value to be passed to plot
+               } 
+                    
+           fun4()                            # All arguments defaulted.
+           fun4(1:100, rnorm(100))           # 1st and 2nd argument passed by order.
+           fun4(1:100, rnorm(100), new=F)    # Last argument is 7th by order, so needs name.
+           fun4(1:100, rnorm(100), new=F, cex=.2)
+           fun4(1:100, rnorm(100), new=F, cex=1, pch=3)
+           fun4(x=1:100, y=rnorm(100), pch=2, w=10, h=2)   # x= and y= not needed but more readable
+           fun4(cex=.2)
+
+# 03:   Functions returning complex data structures:
+
+            fun5 = function(x) {
+                 list(N=length(x),
+                     location=c(
+                           mean=mean(x),
+                           mean.tr.05=mean(x,trim=.05),
+                           mean.tr.10=mean(x,trim=.10),
+                           mean.tr.25=mean(x,trim=.25),
+                           median=median(x)
+                           ),
+                      dispersion=c(
+                           sdev=sd(x),
+                           mad=mad(x),
+                           IQR=IQR(x)
+                          )
+                      )
+                    }
+             summaries = func(rnorm(10000))
+             summaries
+
+#        Semantics 3: All passing of arguments is by value, not reference/name.
+#        In other words, all arguments get copied into the body of the function.
+
+             fun5 = function(x) { x[1] = Inf; x }
+             x = 1:3;  fun5(x);  x
+         # In the above line, fun5() is working on a copy of x, also called x.
+    
+#        Semantics 4: Function bodies have access to outside variables.
+
+             fun6 = function() { x[1] = Inf; x }
+             x = 1:3;  fun6()
+             x               # 'x' was not changed.  The body of fun6() worked on a copy of x.
+             # Rule: Do not use this feature of R semantics.
+             #       Pass all data into a function as arguments.
+             # (See "scoping rules" in R shortly.)
+
+#        Functions called inside functions:
+
+              fun7 = function(x) { rbind(x, fun2(x)) }
+              fun7(1:4)
+
+#        (This is an exception to the rule of not relying on the scoping rules of R.)
+
+#        Functions defined inside functions:
+
+              fun8 = function(x) { fun9 = function(x) { 2*x };  fun9(x) }
+              fun8(1:5)
+              fun9(1:5)               # Does not exist; defined only inside the body.
+
+#        Functions passed as arguments into other functions:
+
+              x = matrix(rnorm(1000),100,10)
+              fun9 = function(x) quantile(x, prob=c(.25,.50,.75))
+              apply(x, 2, fun9)
+
+#        Equivalent:
+
+              apply(x, 2, function(x) quantile(x, prob=c(.25,.50,.75)))
+
+#
+#
+###############################################
+#
+#                Scoping Rules
+#
+###############################################
+#
+#
+#        The scoping rules of a programming language are the rules that determine how the
+#        programming language finds a value for a variable. This is especially important for free
+#        variables inside a function and for functions defined inside a function. Let's look at the
+#        following example function.
+
+              myf = function(x){
+                     y = 6
+                     z = x + y + a1
+                     a2 = 9
+                    insidef = function(p){
+                               tmp = p*a2
+                               sin(tmp)
+                              }
+                    2*insidef(z)
+                  }
+#
+#       In the above function
+#         1). x, p are formal arguments.
+#         2). y, tmp are local variables.
+#         3). a2 is a local variable in the function myf.
+#         4). a2 is a free variable in the function insidef.
+#         5). a1 is a free variable in the function myf.
+#
+#       R uses a so-called lexical scoping rule to nd the value of free variables. With
+#       lexical scoping, free variables are first resolved in the environment in which the function
+#       was created. The following calls to the function myf show this rule.
+#
+#       R tries to find a1 in the environment where myf was created
+#       but there is no object a1
+
+          myf(8)
+ 
+#       define the objects a1 and a2 but what value
+#       did a2 in the function insidef get?
+
+           a1 = 10
+           a2 = 1000
+           myf(8)
+ 
+#      It took a2 in myf, so a2 has the value 9
+#
+#
+###################################
+#
+#        QUERYING R OBJECTS
+#
+###################################
+
+# 01:  Asking for the primary data type:
+
+       class(1:10)
+       class(T)
+       class(letters)
+       class(swiss)         # Like 'letters', 'swiss' comes with R.
+#   
+# 02:  Queries about basic data types:
+
+       is.numeric(1:10)
+       is.character(letters)
+       is.logical(F)
+       is.na(NA)             # use for removal of NAs:
+       x = rnorm(100);  x[rnorm(100)>1] = NA;  is.na(x);  x[!is.na(x)]
+       is.infinite(-Inf)
+       is.null(NULL)
+# 
+# 03:  Queries about complex data types:
+
+       is.vector(letters)
+       is.array(array(1:12,c(2,3,2)))
+       is.matrix(swiss)
+       is.data.frame(swiss)
+       is.list(swiss)
+       is.function(mean)
+
+#
+# 04:  All the query functions that start with "is.":
+
+       apropos("^is[.]")   # '.' is a special character in regular expressions.
+
+#
+# 05:  Querying components of lists and columns in data frames:
+
+       names(swiss)
+
+# 06:  Querying row and column names in matrices and data frames:
+
+       colnames(swiss)   # Same as names() for data frames.
+       rownames(swiss)
+
+#
+##############################################################
+#
+#                     Benchmarking A Function
+#  (used for assessing your effectiveness of your R program)
+#
+##############################################################
+#
+#    To conduct empirical studies of a  functions performance, we usually report
+#    ths system time that a function actually used. Relevant functions
+#
+#    Working function:
+
+      fun3 = function(x, y) {
+            windows(width=5, height=5)
+            par(mgp=c(1.8,.5,0), mar=c(3,3,2,1))
+            plot(x, y, pch=16, cex=.5)
+           }
+       fun3(1:100, rnorm(100))
+
+
+      Sys.time()                    #   gives current system time
+      Sys.Date()                    #   returns the system's current date 
+#     system.time()                 #   return CPU time used
+      system.time(fun3(1:100, rnorm(100))) 
+      difftime(stop, start)        #   difference between two times
+# 
+#      proc.time()
+#
+       ptm = proc.time()
+       fun3(1:100, rnorm(100))
+       proc.time() - ptm
+#
+#
+#
+###########################################################
+#
+#                DEBUGGING AND HANDLING 
+#
+###########################################################
+#
+#     What happens when something goes wrong with your R code? Following are the steps:  
+#     Realizing problems -> making the problem repeatable -> Finding problem -> Fixing and Testing. 
+#
+# 01:  Three key debugging tools: traceback(), options() and browser().
+#
+
+            f<-function(x) {
+                r<-x-g(x)
+                r
+               }
+
+            g<-function(y) {
+                r<-y*h(y)
+                r
+               }
+
+           h<-function(z) {
+                r<-log(z)
+                if(r<10)  r^2
+                else  r^3
+              }
+
+#      a). traceback() lists the sequence of calls that lead to the error.
+#
+            f(-1)                # you will see error message
+            traceback()          # gives the sequence of calls leading to errors
+#           traceback() does not tell you where in the function the error occurred. We need debug()
+#           to go through the function to find where the bug is
+
+            debug()
+            f(-1)
+
+#         ouptu:
+#                debugging in: f(-1)
+#                debug at #1: {
+#                    r <- x - g(x)
+#                    r
+#                   }
+#
+#        After you see the  Browse[1]>" prompt, you can do dierent things:
+#
+#        (1):  Typing n executes the current line and prints the next one;
+#        (2):  Typing c executes the rest of the function without stopping;
+#        (3):  Typing Q quits the debugging;
+#        (4):  Typing where tells where you are in the function call stack;
+#        (5):  Typing ls() list all objects in the local environment;
+#        (6):  Typing an object name or print(<object name>) tells you
+#              current value of the object. If your object has name n, c or Q,
+#              you have to use print() to see their values.             
+#
+#      b). browser() -Inserting a call to browser() in a function will pause the execution of
+#         a function at the point where browser() is called.  Similar to using debug() except 
+#         you can control where execution gets paused.
+#
+               h<-function(z) {
+                    browser() ## a break point inserted here
+                    r<-log(z)
+                    if(r<10) r^2
+                    else r^3
+                }
+#
+# 
+#
+#
+################################################################
+#
+# Changing the working directory:
+# In the standard interface, one can change the working directory...
+#    - temporarily: -> File -> Change Dir
+#    - permanently: R-click on R icon -> Edit Properties -> Start in:
+#
+################################################################

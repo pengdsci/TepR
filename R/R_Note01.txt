@@ -1,0 +1,391 @@
+
+################################################################
+#
+#              Note 01:        INTRO TO R
+#
+################################################################
+
+#########################
+#    The R website:
+#########################
+
+#   http://cran.r-project.org
+#
+#   (Google "R" -> one of the first entries)
+#
+# Downloading R:
+#
+#   ->  Sidebar "Download, Packages": CRAN 
+#   ->  any site in the US
+#   ->  Windows
+#   ->  base
+#   ->  "Download R-3.... for Windows (64/32 bit build)"
+#   ->  installation dialog in setup wizzard
+#
+#   The setup program should self-install and create an icon on your desktop.
+#   Clicking the icon should open up an R interpreter window ("R Gui").
+#
+#   The base is really just the base.  There are many contributed
+#   library packages whose binaries can be downloaded from
+#
+#   ->  Packages
+#
+#   You will not have to download them explicitly, though;
+#   there are R functions that allow you to get them while running R.
+#   In the R Gui you can also go through the "Packages" item in the toolbar.
+
+#    This fetches one or more packages from the default repository (a online web
+#    server like CRAN, you have to be on line) of your R system and installs it.
+#    If the default is not properly set, you have to install each manually.
+
+     need_to_install_pkgs = c("ggplot2","RColorBrewer","rgl","reshape2")
+     install.packages(need_to_install_pkgs)        #install 4 package by one call.
+
+#    This installs the package from source file locally.
+#    Change the file path accordingly based on where you saved the file.
+
+     install.packages("J:/Download/highlight_0.4.1.tar.gz", repos = NULL, type="source")
+     library(highlight) #attach the package. 
+
+#    Notice that "_0.4.1.tar.gz" part in
+#    the file name is not part of the package name.
+
+
+##############################################
+#
+#   Recommended Text Editord for R Script
+#
+###############################################   
+
+# 01:  R Studio IDE
+#      http://www.rstudio.com/
+
+# 02: Sublime Text
+#      http://www.sublimetext.com/
+
+# 03: Tinn-R
+#     http://sourceforge.net/projects/tinn-r/
+
+# 04: R built-in Script Esitor
+
+# 05: Notepad
+
+####### MS WORD is a BAD editor for R script  #########
+
+
+########################
+#
+#     OPERATION OF R:
+#
+#########################
+
+# 01: R is an INTERPRETED LANGUAGE:
+#     Users type expressions and see results immediately.
+#     Example:
+        for(i in 1:10) { if(i%%2==0) print(i) }
+#     As opposed to:
+#     - ... languages (C, Fortran)
+#     - ... software (such as SAS' JMP)
+#    
+#
+# 02: R is HIGH-LEVEL:
+#     It operates on complex data structures such as 
+#     vectors, matrices, arrays, lists, dataframes,
+#     as opposed to C and Fortran that operate on individual numbers only.
+#     (This requires some getting used to for C programmers.)
+#    
+#
+# 03: PRIMARY BEHAVIOR: Whatever is typed, print the results.
+      2
+      print(2)       # same
+
+      "a"
+      print("a")     # same
+
+#   Vector of length greater than 1:
+      1:3
+      print(1:3)     # same
+#
+#
+# 04: SYNTAX:
+#
+#      Naming: -- R IS CASE SENTIVE !!!!
+#              -- A name in R is a pointer to an object. Every variable name starts with a
+#                 letter, not value. Special characters like "_" and "." can be used in the 
+#                 middle (some internal functions start with ".").
+#              -- Function names also be used as variable names
+#
+#      Quoting: Single quote and double quote are treated as equivalent, both as quoting 
+#               for strings.
+#  Punctuation: a) Complete R expressions must be separated by different lines, or by semi-colons, 
+#               or enclose by bracket ().
+
+               2; 3^3; sqrt(9)
+
+#               b) Spaces are irrelevant, except inside strings:
+
+                2+3; 2  +    3; "ab"; "a   b"
+
+#              c) Statements can run over multiple lines:
+                  2 + 3 +     # \
+                  4           # / One statement
+# 
+#   Assignments: Variable assignments (associate a name with an object or function) can be carried
+#                by either "=", "=" or by function "assign()", but assignments for the arguments in the 
+#                functions can only be done by "=".
+                 x = 3:4; x
+                 x = 3:4;                         # both works perfectly
+                 x = c(a=3, b=4, c=5); x; c       # c=5 is treated as an assignment expresssion
+                 a = b = c(1, 2, 3)                # simutaneous assignment creates distinct copies
+                 a[1]=5; a; b                      # Changing a wouldn't affect b.
+#
+# Variable Scope: Variables defined in functions are all local, in the sense that they can not be
+#                 visible (or called) in their parent function but only to their child functions 
+#                 (the functions inside this function).
+
+#       Keywords: All the reserved keywords will be highlighted in R studio, such as for, function,
+#                 etc. Type ?reserved for the full list.
+
+##############################
+#
+##   Workspace & History
+#
+##############################
+
+#      Workspace:  stores all the object you created, including all different kind of variables, data, 
+#                  and functions. You have the option to save the workspace and automatically
+#                  load it. Once you load it, all the previous created objects are immediately available
+#                  to you and don’t need further computations. This can save you a lot of time. 
+
+#         History: is the text code you submitted, for you to do re-submission. You can also save and load
+#                  the R history.
+
+#   Working Directory:  is basically the folder/directory you are working on. Set the working directly
+#                       to a specific folder will typical streamline your coding, since all importing, 
+                        saving and sourcing can be carried in a easier way in the same folder. 
+
+                   getwd()                        # get the current working directory
+                   setwd("I:\\STA574\\Rnote")     # set the working directory using absolute file path.
+
+
+
+#################################
+#
+#         BASIC DATA TYPES
+#
+##################################
+
+#   01: NUMERIC: 
+#       The usual unary and binary operations and analytic functions:
+#       +, -, *, /, %%, %/%, ^, log, sqrt, sin, acos...
+        2+3            # Add.
+        5.3*1E10       # Multiply.
+        10%%3          # Modulo.
+        exp(1)         # Exponentiation.
+        log(2.718282)  # Log of the number 'e'; 'log' is e-based.
+        log10(10)      # 10-based log
+        pi             # That's the number 'greek pi', 3.14159
+        sin(pi/2)      # Angles are to be given in arcs, not degrees.
+        sin(pi)        # Dito.
+        acos(0)        # This is the inverse of cos, arccos, hence pi/2.
+        pi/2           # This is the only hardwired constant: 3.14159...
+
+#
+#   02: STRINGS: can be single or double quoted, but the print function
+#              uses double quotes.
+#  
+              'a'; "a"; 'abc'; "abc"
+#          
+#             There is no indexed access to individual characters and
+#             substrings in R; one uses the "substring" function instead:
+
+              substring("abcxyz",4,6)
+
+#             Other basic string manipulations:
+
+              paste("my","word")
+              nchar("Supercalifragilistikexpialidocious")
+
+#             There are two hardwired character vectors that contain the lower and
+#             upper case letters:
+
+              letters
+              LETTERS
+#
+#
+#   03: LOGICAL values: have two names each, but the print function
+#                     always uses the longer.
+
+                     TRUE; FALSE; T; F
+
+#                   They are implemented as the values 1 and 0 for T and F, respectively.
+#                   They are the result of the usual comparisons: <, >, <=, >=, ==, !=
+
+                    1<2; 1>2;          "ab" <= "abcd"
+                    "ab" > "ac";       "ab" != "AB"
+                    "ab" != 2;          0==F;            1==T
+#
+#
+#   04: MISSING values and infinityies:     NA, Inf, -Inf:
+
+                     NA; NaN; Inf; -Inf; 1/0; Inf==1/0; 0/0
+
+#       CAUTION: the following does not give T!!!
+
+               NA==1
+
+#       If you want to test for NA, you must use the function is.na():
+
+            is.na(NA)
+#
+
+
+#######################################
+#
+##         Built-in Functions 
+#
+#######################################
+
+
+# 01: R is a FUNCTIONAL LANGUAGE:
+#      Functions return values that in turn can be arguments to functions.
+#      Expressions evaluate inside out, e.g., log(2*2.5))^3:
+
+         2.5; 2*2.5; log(2*2.5); log(2*2.5)^3
+#
+# 02: STATEMENTS/EXPRESSIONS:
+#     There are two types of expressions: assignments and side effects.
+#
+#     1) Assignments allocate data structures and
+#        make variables point to them.  
+
+           x = 1:3              # Allocate a vector 1,2,3 and make 'x' point to it.
+
+#     2) Side effects are essentially display operations 
+#        such as printing, plotting, showing help; unlike assignments,
+#        they don't change the computational state of the R system.
+
+           x
+           print(x)
+           plot(x)
+           help("+")       # Show the help page of addition.
+           help(sqrt)      # Show the help page of the square root function.
+           help("sqrt")    # Dito.
+
+#     3) Composite Statements:
+
+           {print(1); plot(1:10)}
+
+#        Will be needed in loops and functions.
+#
+#
+#     4) Assignments to variables come in four equivalent syntactic forms:
+#           x = ...
+#           x = ...
+#           ... -> x
+#           assign("x",...)
+#        Examples:
+
+         x = sqrt(2 * 3)                  # Root of product of 2 and 3
+         x = sqrt(2 * 3)                  # Both can be used: '=' and '='
+         sqrt(2 * 3) -> x                 # This can be used, too, if you must...
+         y = c(1,3,10,1,1,1111,0,1,1)     # combine 1,3,10... into a vector 'y'
+         z = 1:3                          # Assign the vector containing 1,2,3 to a 'z'.
+         assign("x", sqrt(2*4));  print(x)
+
+
+# 03:  HELP: 
+#      help(function) or help("function") shows function documentation.
+
+              help(sqrt)
+
+#     In the output of this function, check out the section
+#      with header "See Also:".  It will tell you that you
+#      can find related functions by calling
+
+        help("Arithmetic")
+        help("log")
+        help("sin")
+        help("Special")
+#          
+        help(c)
+        help("c")        # Same as help(c)  
+        help("*")        # help(*) does not work
+#
+#
+# 04:  APROPOS - finding objects by partial names 
+#      apropos("char") lists all functions whose name contains the string "char".
+
+        apropos("char")
+
+#     This is often useful for finding related functions.  
+#     Apropos combined with the section "See Also:" in the output
+#     of help() is a powerful tool for searching functions.
+#     There are about 1,700 built-in functions, and more if you
+#     download special-purpose packages from the R website.
+#
+# 05: Printing a function: 
+#     allows you to see the arguments in a simple way
+
+        runif      # same as: print(runif)
+        rnorm      # (functions are "first class citizens", like numbers, vectors,...)
+#
+#
+#
+# 06: MANAGEMENT OF DATA AND FUNCTIONS: 
+#
+#     a) Listing R objects, both data and functions: either of
+
+          ls();  objects()
+
+#        This lists all data structures and functions that YOU defined.
+#
+#     b) Removing data and functions:
+
+           x = 1:10
+           rm(x)
+           x
+
+#     c) Looking for partly remembered data and functions:
+#        In case you remember only part of a name, you can look it up
+#        with a partial pattern:
+
+          xx = 10
+          ls(pattern="x")
+#
+#        This will list any dataset and function whose name contains "x"
+#        such as 'last.warning'.
+
+#     d) List all functions that come with the base package of R:
+
+          ls("package:base")     # Over 1,100 functions...
+
+#     e)  About packages: 
+#         (1)  Packages are namespaces for data AND functions.
+#              (You can't have a dataset 'x' and a function 'x' at the same time.)
+#         (2)  You can list the packages in your environment:
+#
+               search()
+#
+#         (3)  When you use a name, R goes through the search list
+#              shown by 'search()', package by package, stopping when
+#              it finds the name.  This implies that the same name can appear
+#              in multiple packages, but only the one in the first package
+#              will be found.
+
+               ls = 2:5          # mask 'ls' in "package:base" with user data
+               ls
+               rm(ls)            # remove user data, unmasking the function 'ls()' 
+               ls
+#
+#
+# 07:  QUITTING:
+        q()
+#     R asks whether you want to save the workspace; 
+#     usually you say "yes". 
+#
+#
+########################################################################
+#################################   END of Note 01 #####################
+########################################################################
+
